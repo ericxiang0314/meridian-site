@@ -1,7 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { PageHead } from "@/components/PageHead"
 import { airportByIata, fieldByIata } from "@/lib/db"
 
 type Params = { params: Promise<{ iata: string }> }
@@ -17,7 +16,6 @@ export default async function AirportPage({ params }: Params) {
   const field = fieldByIata(airport.iata)
   return (
     <>
-      <PageHead title="Meridian" />
       <article className="record">
         <div>
           <h1>{airport.iata}</h1>

@@ -1,6 +1,5 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { PageHead } from "@/components/PageHead"
 import { Strip } from "@/components/Fragments"
 
 export const metadata: Metadata = { title: "The desk" }
@@ -8,7 +7,6 @@ export const metadata: Metadata = { title: "The desk" }
 export default function DeskPage() {
   return (
     <>
-      <PageHead title="Meridian" />
       <article className="record">
         <div className="paper">
           <h2>The desk</h2>

@@ -1,6 +1,5 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { PageHead } from "@/components/PageHead"
 import { searchAirlines, searchAirports, searchTypes } from "@/lib/db"
 
 export const metadata: Metadata = { title: "Book" }
@@ -12,7 +11,6 @@ export default async function BookPage({ searchParams }: { searchParams: Promise
   const types = searchTypes(q)
   return (
     <>
-      <PageHead title="Meridian" />
       <section className="find">
         <form action="/book" method="get">
           <input name="q" defaultValue={q} placeholder="HKG, Cathay, A359" aria-label="Search the book" />

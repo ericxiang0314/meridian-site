@@ -1,19 +1,22 @@
 import type { Metadata } from "next"
-import { Inter, Newsreader } from "next/font/google"
+import { Schibsted_Grotesk, Source_Sans_3 } from "next/font/google"
+import { Shell } from "@/components/Shell"
 import "./globals.css"
 
-const sans = Inter({ subsets: ["latin"], variable: "--font-sans", weight: ["400", "500", "600"] })
-const serif = Newsreader({ subsets: ["latin"], variable: "--font-serif", style: ["normal", "italic"], weight: ["400", "600"] })
+const display = Schibsted_Grotesk({ subsets: ["latin"], variable: "--font-display", weight: ["500", "700"] })
+const body = Source_Sans_3({ subsets: ["latin"], variable: "--font-body", weight: ["400", "600"] })
 
 export const metadata: Metadata = {
   title: { default: "Meridian", template: "%s · Meridian" },
-  description: "The night desk Meridian belongs to. A book of airports, airlines, and the fields you can stand beside.",
+  description: "A night flight desk for the Mac, and the book of airports, airlines, and public fields it belongs to.",
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${sans.variable} ${serif.variable}`}>
-      <body>{children}</body>
+    <html lang="en" className={`${display.variable} ${body.variable}`}>
+      <body>
+        <Shell>{children}</Shell>
+      </body>
     </html>
   )
 }
