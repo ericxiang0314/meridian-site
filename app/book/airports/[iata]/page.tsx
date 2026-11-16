@@ -16,7 +16,7 @@ export default async function AirportPage({ params }: Params) {
   const field = fieldByIata(airport.iata)
   return (
     <>
-      <article className="record">
+      <article className="record sheet">
         <div>
           <h1>{airport.iata}</h1>
           <p>{airport.name}</p>

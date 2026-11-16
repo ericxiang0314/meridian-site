@@ -7,6 +7,14 @@ export const metadata: Metadata = { title: "The desk" }
 export default function DeskPage() {
   return (
     <>
+      <section className="page-intro">
+        <img src="/atlas/sturup-airport-by-night.jpg" alt="An SAS aircraft under the floodlights at Malmö Airport" width={1600} height={1060} />
+        <div>
+          <h1>Desk</h1>
+          <p>The Mac app is the working copy of this atlas.</p>
+        </div>
+      </section>
+      <div className="sheet">
       <article className="record">
         <div className="paper">
           <h2>The desk</h2>
@@ -21,6 +29,7 @@ export default function DeskPage() {
           <Link className="action" href="/book">Open the book</Link>
         </div>
       </article>
+      </div>
     </>
   )
 }

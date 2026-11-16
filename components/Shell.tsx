@@ -4,7 +4,8 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 
 const links = [
-  { href: "/", label: "Design" },
+  { href: "/", label: "Atlas" },
+  { href: "/chart", label: "Chart" },
   { href: "/book", label: "Book" },
   { href: "/fields", label: "Fields" },
   { href: "/desk", label: "Desk" },
@@ -28,10 +29,12 @@ export function Shell({ children }: { children: React.ReactNode }) {
               </Link>
             )
           })}
-          <a className="download" href="https://github.com/ericxiang0314/meridian-site">GitHub</a>
         </nav>
       </header>
       <main>{children}</main>
+      <footer className="colophon">
+        <p>Narita apron by Nanashinodensyaku. Edinburgh apron by M J Richardson. Malmö by Niklas Morberg. Sumburgh by Ronnie Robertson. All CC BY-SA, via Wikimedia Commons.</p>
+      </footer>
     </>
   )
 }

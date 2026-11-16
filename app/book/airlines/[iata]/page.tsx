@@ -15,7 +15,7 @@ export default async function AirlinePage({ params }: Params) {
   if (!airline) notFound()
   return (
     <>
-      <article className="record">
+      <article className="record sheet">
         <div>
           <h1>{airline.iata}</h1>
           <p>{airline.name}</p>

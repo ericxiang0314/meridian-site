@@ -16,7 +16,7 @@ export function FieldFilter({ fields }: { fields: Field[] }) {
   }, [fields, query])
   return (
     <section className="results">
-      <h1>Fields</h1>
+      <h2>The fourteen</h2>
       <p>Public places only. If a note does not name a place, do not invent one at the fence.</p>
       <form className="find inline" onSubmit={(event) => event.preventDefault()}>
         <input value={query} placeholder="Hong Kong, deck, hill" aria-label="Filter fields" onChange={(event) => setQuery(event.target.value)} />
