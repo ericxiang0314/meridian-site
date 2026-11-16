@@ -5,6 +5,12 @@ import { airportsInBand, bands, type Band } from "@/lib/atlas"
 
 type Params = { params: Promise<{ band: string }> }
 
+export const dynamicParams = false
+
+export function generateStaticParams() {
+  return bands.map((band) => ({ band }))
+}
+
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   return { title: `${(await params).band} airports` }
 }

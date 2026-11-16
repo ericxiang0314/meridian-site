@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useEffect, useState } from "react"
 import { landPath } from "@/lib/land"
 import { initialBearing, project } from "@/lib/geo"
+import { searchAirports } from "@/lib/db"
 import { formatPosition, pointAlong, trackPoints } from "@/lib/sphere"
 import type { Scene } from "./Stage"
 
@@ -64,15 +65,9 @@ export function DeskPreview({ scene }: { scene: Scene }) {
       return
     }
     const controller = new AbortController()
-    const timer = window.setTimeout(async () => {
-      try {
-        const response = await fetch(`/api/search?q=${encodeURIComponent(q)}`, { signal: controller.signal })
-        if (!response.ok) return
-        const data = (await response.json()) as { airports: Hit[] }
-        setHits(data.airports.slice(0, 5))
-      } catch {
-        if (!controller.signal.aborted) setHits([])
-      }
+    const timer = window.setTimeout(() => {
+      if (controller.signal.aborted) return
+      setHits(searchAirports(q, 5))
     }, 140)
     return () => {
       controller.abort()

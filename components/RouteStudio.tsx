@@ -1,8 +1,10 @@
 "use client"
 
+import { useSearchParams } from "next/navigation"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { landPath } from "@/lib/land"
 import { initialBearing, project } from "@/lib/geo"
+import { pairScene } from "@/lib/pair"
 import { formatDuration, formatPosition, pointAlong, trackPoints } from "@/lib/sphere"
 import { CodeField } from "./CodeField"
 import type { Scene } from "./Stage"
@@ -26,10 +28,15 @@ function chain(points: { lat: number; lon: number }[]): string {
 }
 
 export function RouteStudio({ scenes, active, initialCustom = null }: { scenes: Scene[]; active: number; initialCustom?: Scene | null }) {
-  const [index, setIndex] = useState(active)
-  const [custom, setCustom] = useState<Scene | null>(initialCustom)
-  const [fromCode, setFromCode] = useState(initialCustom?.from ?? scenes[active]?.from ?? "")
-  const [toCode, setToCode] = useState(initialCustom?.to ?? scenes[active]?.to ?? "")
+  const params = useSearchParams()
+  const routeName = (params.get("route") ?? "").toUpperCase()
+  const found = scenes.findIndex((item) => `${item.from}-${item.to}` === routeName)
+  const queried = pairScene(params.get("from") ?? "", params.get("to") ?? "")
+  const start = found >= 0 ? found : active
+  const [index, setIndex] = useState(start)
+  const [custom, setCustom] = useState<Scene | null>(initialCustom ?? queried)
+  const [fromCode, setFromCode] = useState(initialCustom?.from ?? queried?.from ?? scenes[start]?.from ?? "")
+  const [toCode, setToCode] = useState(initialCustom?.to ?? queried?.to ?? scenes[start]?.to ?? "")
   const [speed, setSpeed] = useState(480)
   const [along, setAlong] = useState(0.28)
   const [note, setNote] = useState("")
@@ -112,7 +119,7 @@ export function RouteStudio({ scenes, active, initialCustom = null }: { scenes: 
     }
   }, [scene, along])
 
-  async function drawPair(from: string, to: string) {
+  function drawPair(from: string, to: string) {
     const left = from.trim().toUpperCase()
     const right = to.trim().toUpperCase()
     if (left.length < 3 || right.length < 3) return
@@ -125,15 +132,15 @@ export function RouteStudio({ scenes, active, initialCustom = null }: { scenes: 
       setPlaying(false)
       return
     }
-    const response = await fetch(`/api/track?from=${left}&to=${right}`)
-    if (!response.ok) {
+    const next = pairScene(left, right)
+    if (!next) {
       setNote("Those codes are not in the book.")
       return
     }
     setNote("")
     setPlaying(false)
     setAlong(0.28)
-    setCustom((await response.json()) as Scene)
+    setCustom(next)
   }
 
   function placeAt(clientX: number, clientY: number) {
@@ -258,11 +265,11 @@ export function RouteStudio({ scenes, active, initialCustom = null }: { scenes: 
           className="pair-form"
           onSubmit={(event) => {
             event.preventDefault()
-            void drawPair(fromCode, toCode)
+            drawPair(fromCode, toCode)
           }}
         >
-          <CodeField label="From" value={fromCode} onChange={setFromCode} onPick={(code) => void drawPair(code, toCode)} />
-          <CodeField label="To" value={toCode} onChange={setToCode} onPick={(code) => void drawPair(fromCode, code)} />
+          <CodeField label="From" value={fromCode} onChange={setFromCode} onPick={(code) => drawPair(code, toCode)} />
+          <CodeField label="To" value={toCode} onChange={setToCode} onPick={(code) => drawPair(fromCode, code)} />
           <button type="submit">Draw</button>
         </form>
         {note ? <p className="scene-note">{note}</p> : null}
@@ -274,7 +281,7 @@ export function RouteStudio({ scenes, active, initialCustom = null }: { scenes: 
               const nextTo = fromCode
               setFromCode(nextFrom)
               setToCode(nextTo)
-              void drawPair(nextFrom, nextTo)
+              drawPair(nextFrom, nextTo)
             }}
           >
             Swap

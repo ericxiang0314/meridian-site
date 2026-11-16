@@ -1,9 +1,15 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { airportByIata, fieldByIata } from "@/lib/db"
+import { airportByIata, allFields, fieldByIata } from "@/lib/db"
 
 type Params = { params: Promise<{ iata: string }> }
+
+export const dynamicParams = false
+
+export function generateStaticParams() {
+  return allFields().map((field) => ({ iata: field.iata }))
+}
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const field = fieldByIata((await params).iata)

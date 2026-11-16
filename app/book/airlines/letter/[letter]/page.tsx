@@ -6,6 +6,12 @@ import { airlinesForLetter, letterCounts, letters } from "@/lib/atlas"
 
 type Params = { params: Promise<{ letter: string }> }
 
+export const dynamicParams = false
+
+export function generateStaticParams() {
+  return letters.map((letter) => ({ letter }))
+}
+
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   return { title: `Airlines ${(await params).letter.toUpperCase()}` }
 }

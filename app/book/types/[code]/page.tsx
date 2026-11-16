@@ -1,9 +1,15 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { typeRecord, typesForMaker } from "@/lib/atlas"
+import { atlasTypes, typeRecord, typesForMaker } from "@/lib/atlas"
 
 type Params = { params: Promise<{ code: string }> }
+
+export const dynamicParams = false
+
+export function generateStaticParams() {
+  return atlasTypes.filter((row) => /^[A-Z0-9]{2,8}$/.test(row.code)).map((row) => ({ code: row.code }))
+}
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const row = typeRecord((await params).code)

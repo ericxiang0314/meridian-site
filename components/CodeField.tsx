@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useId, useRef, useState } from "react"
+import { searchAirports } from "@/lib/db"
 
 type Hit = { iata: string; city: string; name: string }
 
@@ -28,16 +29,11 @@ export function CodeField({
       return
     }
     const controller = new AbortController()
-    const timer = window.setTimeout(async () => {
-      try {
-        const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`, { signal: controller.signal })
-        if (!response.ok) return
-        const data = (await response.json()) as { airports: Hit[] }
-        setHits(data.airports.slice(0, 6))
-        setOpen(data.airports.length > 0)
-      } catch {
-        if (!controller.signal.aborted) setOpen(false)
-      }
+    const timer = window.setTimeout(() => {
+      if (controller.signal.aborted) return
+      const found = searchAirports(query, 6)
+      setHits(found)
+      setOpen(found.length > 0)
     }, 140)
     return () => {
       controller.abort()

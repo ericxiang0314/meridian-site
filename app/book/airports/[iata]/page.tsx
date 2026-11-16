@@ -2,10 +2,16 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { ClockBoard } from "@/components/ClockBoard"
-import { airportRecord, distanceNm, nearbyAirports } from "@/lib/atlas"
+import { airportRecord, atlasAirports, distanceNm, nearbyAirports } from "@/lib/atlas"
 import { fieldByIata } from "@/lib/db"
 
 type Params = { params: Promise<{ iata: string }> }
+
+export const dynamicParams = false
+
+export function generateStaticParams() {
+  return atlasAirports.map((row) => ({ iata: row.iata }))
+}
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const airport = airportRecord((await params).iata)

@@ -58,6 +58,14 @@ export function allFields(): Field[] {
   return fields
 }
 
+export function airlineCodes(): string[] {
+  return airlines.map((row) => row.iata)
+}
+
+export function typeCodes(): string[] {
+  return types.map((row) => row.code)
+}
+
 export function searchAirports(query: string, limit = 12): Airport[] {
   const q = query.trim()
   if (!q) {

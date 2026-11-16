@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { DeskPreview } from "@/components/DeskPreview"
 import { atlasCounts } from "@/lib/atlas"
+import { publicPath } from "@/lib/public-path"
 import { routeScenes } from "@/lib/routes"
 
 export default function Home() {
@@ -10,7 +11,7 @@ export default function Home() {
     <>
       <section className="product-hero">
         <img
-          src="/atlas/barcelona-night.jpg"
+          src={publicPath("/atlas/barcelona-night.jpg")}
           alt="Barcelona airport at night, seen from the air"
           width={2800}
           height={1570}
@@ -30,7 +31,7 @@ export default function Home() {
 
       <section className="band">
         <figure>
-          <img src="/atlas/haneda-lineup.jpg" alt="An airliner holding on the runway lights at Haneda" width={2800} height={1849} />
+          <img src={publicPath("/atlas/haneda-lineup.jpg")} alt="An airliner holding on the runway lights at Haneda" width={2800} height={1849} />
         </figure>
         <div className="band-copy">
           <h2>The chart</h2>
@@ -41,7 +42,7 @@ export default function Home() {
 
       <section className="band flip">
         <figure>
-          <img src="/atlas/narita-apron.jpg" alt="United aircraft on the Narita apron at night" width={2800} height={1866} />
+          <img src={publicPath("/atlas/narita-apron.jpg")} alt="United aircraft on the Narita apron at night" width={2800} height={1866} />
         </figure>
         <div className="band-copy">
           <h2>The book</h2>
@@ -54,7 +55,7 @@ export default function Home() {
 
       <section className="band">
         <figure>
-          <img src="/atlas/sumburgh-beach.jpg" alt="Sumburgh Airport from the public beach at dusk" width={2800} height={1524} />
+          <img src={publicPath("/atlas/sumburgh-beach.jpg")} alt="Sumburgh Airport from the public beach at dusk" width={2800} height={1524} />
         </figure>
         <div className="band-copy">
           <h2>The fields</h2>
@@ -64,7 +65,7 @@ export default function Home() {
       </section>
 
       <section className="get-band">
-        <img src="/atlas/dulles-dusk.jpg" alt="Washington Dulles at dusk" width={2800} height={1662} />
+        <img src={publicPath("/atlas/dulles-dusk.jpg")} alt="Washington Dulles at dusk" width={2800} height={1662} />
         <div>
           <h2>Version 0.2, on the Mac</h2>
           <p>Keys 1 to 7 move among the map, the airports, the airlines, the sky, the history, the library, and settings.</p>

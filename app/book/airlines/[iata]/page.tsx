@@ -1,9 +1,15 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { airlineByIata } from "@/lib/db"
+import { airlineByIata, airlineCodes } from "@/lib/db"
 
 type Params = { params: Promise<{ iata: string }> }
+
+export const dynamicParams = false
+
+export function generateStaticParams() {
+  return airlineCodes().filter((iata) => /^[A-Z0-9]{2,4}$/.test(iata)).map((iata) => ({ iata }))
+}
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const airline = airlineByIata((await params).iata)

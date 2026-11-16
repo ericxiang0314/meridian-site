@@ -1,12 +1,12 @@
+import type { Scene } from "@/components/Stage"
 import { airportByIata } from "@/lib/db"
 import { haversineNm, initialBearing } from "@/lib/geo"
 
-export async function GET(request: Request) {
-  const url = new URL(request.url)
-  const from = airportByIata(url.searchParams.get("from") ?? "")
-  const to = airportByIata(url.searchParams.get("to") ?? "")
-  if (!from || !to) return Response.json({ error: "Those codes are not in the book." }, { status: 404 })
-  return Response.json({
+export function pairScene(fromCode: string, toCode: string): Scene | null {
+  const from = airportByIata(fromCode)
+  const to = airportByIata(toCode)
+  if (!from || !to) return null
+  return {
     from: from.iata,
     to: to.iata,
     fromCity: from.city || from.name,
@@ -17,5 +17,5 @@ export async function GET(request: Request) {
     toLon: to.lon,
     nm: haversineNm(from, to),
     bearing: initialBearing(from, to),
-  })
+  }
 }
