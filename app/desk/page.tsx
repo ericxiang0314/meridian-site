@@ -8,7 +8,7 @@ export default function DeskPage() {
   return (
     <>
       <section className="page-intro">
-        <img src="/atlas/sturup-airport-by-night.jpg" alt="An SAS aircraft under the floodlights at Malmö Airport" width={1600} height={1060} />
+        <img src="/atlas/dulles-dusk.jpg" alt="Washington Dulles at dusk, the terminal roof and the tower above the approach road" width={2800} height={1662} />
         <div>
           <h1>Desk</h1>
           <p>The Mac app is the working copy of this atlas.</p>

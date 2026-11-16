@@ -1,18 +1,28 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
+import { landPath } from "@/lib/land"
+import { initialBearing, project } from "@/lib/geo"
+import { formatDuration, formatPosition, pointAlong, trackPoints } from "@/lib/sphere"
+import { CodeField } from "./CodeField"
 import type { Scene } from "./Stage"
 
-function project(lat: number, lon: number, w: number, h: number) {
-  return { x: ((lon + 180) / 360) * w, y: ((90 - lat) / 180) * h }
-}
+const W = 960
+const H = 480
 
-function pointOnCurve(a: { x: number; y: number }, c: { x: number; y: number }, b: { x: number; y: number }, t: number) {
-  const u = 1 - t
-  return {
-    x: u * u * a.x + 2 * u * t * c.x + t * t * b.x,
-    y: u * u * a.y + 2 * u * t * c.y + t * t * b.y,
-  }
+function chain(points: { lat: number; lon: number }[]): string {
+  let command = "M"
+  let previous: number | null = null
+  return points
+    .map((point) => {
+      if (previous != null && Math.abs(point.lon - previous) > 180) command = "M"
+      const placed = project(point.lat, point.lon, W, H)
+      previous = point.lon
+      const piece = `${command}${placed.x.toFixed(1)} ${placed.y.toFixed(1)}`
+      command = "L"
+      return piece
+    })
+    .join("")
 }
 
 export function RouteStudio({ scenes, active, initialCustom = null }: { scenes: Scene[]; active: number; initialCustom?: Scene | null }) {
@@ -21,54 +31,85 @@ export function RouteStudio({ scenes, active, initialCustom = null }: { scenes: 
   const [fromCode, setFromCode] = useState(initialCustom?.from ?? scenes[active]?.from ?? "")
   const [toCode, setToCode] = useState(initialCustom?.to ?? scenes[active]?.to ?? "")
   const [speed, setSpeed] = useState(480)
-  const [along, setAlong] = useState(0.35)
+  const [along, setAlong] = useState(0.28)
   const [note, setNote] = useState("")
-  const [now, setNow] = useState("")
-
-  useEffect(() => {
-    const tick = () =>
-      setNow(
-        new Intl.DateTimeFormat("en-US", {
-          weekday: "short",
-          month: "short",
-          day: "numeric",
-          hour: "numeric",
-          minute: "2-digit",
-        }).format(new Date()),
-      )
-    tick()
-    const id = window.setInterval(tick, 30_000)
-    return () => window.clearInterval(id)
-  }, [])
+  const [playing, setPlaying] = useState(false)
+  const [dragging, setDragging] = useState(false)
+  const svgRef = useRef<SVGSVGElement>(null)
+  const indexRef = useRef(index)
+  indexRef.current = index
 
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
       const tag = (event.target as HTMLElement | null)?.tagName
       if (tag === "INPUT" || tag === "TEXTAREA") return
-      if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return
-      event.preventDefault()
-      setCustom(null)
-      setIndex((current) => {
-        const next = event.key === "ArrowRight" ? current + 1 : current - 1
-        return (next + scenes.length) % scenes.length
-      })
+      if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
+        event.preventDefault()
+        const next = event.key === "ArrowRight" ? indexRef.current + 1 : indexRef.current - 1
+        const wrapped = (next + scenes.length) % scenes.length
+        setPlaying(false)
+        setCustom(null)
+        setIndex(wrapped)
+        setFromCode(scenes[wrapped].from)
+        setToCode(scenes[wrapped].to)
+        setAlong(0.28)
+      }
+      if (event.key === " " && tag !== "BUTTON") {
+        event.preventDefault()
+        setPlaying((value) => !value)
+      }
     }
     window.addEventListener("keydown", onKey)
     return () => window.removeEventListener("keydown", onKey)
-  }, [scenes.length])
+  }, [scenes])
 
   const scene = custom ?? scenes[index] ?? scenes[0]
-  const hours = scene ? Math.round((scene.nm / speed) * 10) / 10 : 0
+  const hours = scene && speed > 0 ? scene.nm / speed : 0
 
-  const plane = useMemo(() => {
+  useEffect(() => {
+    if (!playing || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
+    let frame = 0
+    let last = performance.now()
+    const duration = Math.min(28000, Math.max(7000, hours * 1600))
+    const step = (now: number) => {
+      const delta = now - last
+      last = now
+      setAlong((current) => {
+        const next = current + delta / duration
+        if (next >= 1) {
+          setPlaying(false)
+          return 1
+        }
+        return next
+      })
+      frame = window.requestAnimationFrame(step)
+    }
+    frame = window.requestAnimationFrame(step)
+    return () => window.cancelAnimationFrame(frame)
+  }, [playing, hours])
+
+  const geometry = useMemo(() => {
     if (!scene) return null
-    const w = 860
-    const h = 480
-    const a = project(scene.fromLat, scene.fromLon, w, h)
-    const b = project(scene.toLat, scene.toLon, w, h)
-    const wrap = Math.abs(a.x - b.x) > w / 2
-    const c = { x: (a.x + b.x) / 2, y: Math.min(a.y, b.y) - 48 }
-    return { w, h, a, b, c, wrap, dot: wrap ? b : pointOnCurve(a, c, b, along) }
+    const from = { lat: scene.fromLat, lon: scene.fromLon }
+    const to = { lat: scene.toLat, lon: scene.toLon }
+    const points = trackPoints(from, to)
+    const cut = Math.round(along * (points.length - 1))
+    const here = pointAlong(from, to, along)
+    const ahead = pointAlong(from, to, Math.min(1, along + 0.012))
+    const herePoint = project(here.lat, here.lon, W, H)
+    const aheadPoint = project(ahead.lat, ahead.lon, W, H)
+    const jump = Math.abs(here.lon - ahead.lon) > 180
+    const angle = jump ? 0 : (Math.atan2(aheadPoint.y - herePoint.y, aheadPoint.x - herePoint.x) * 180) / Math.PI
+    return {
+      from: project(from.lat, from.lon, W, H),
+      to: project(to.lat, to.lon, W, H),
+      flown: chain(points.slice(0, cut + 1)),
+      rest: chain(points.slice(cut)),
+      here,
+      herePoint,
+      angle,
+      heading: initialBearing(here, ahead),
+    }
   }, [scene, along])
 
   async function drawPair(from: string, to: string) {
@@ -80,6 +121,8 @@ export function RouteStudio({ scenes, active, initialCustom = null }: { scenes: 
       setCustom(null)
       setIndex(scenes.indexOf(known))
       setNote("")
+      setAlong(0.28)
+      setPlaying(false)
       return
     }
     const response = await fetch(`/api/track?from=${left}&to=${right}`)
@@ -88,7 +131,29 @@ export function RouteStudio({ scenes, active, initialCustom = null }: { scenes: 
       return
     }
     setNote("")
+    setPlaying(false)
+    setAlong(0.28)
     setCustom((await response.json()) as Scene)
+  }
+
+  function placeAt(clientX: number, clientY: number) {
+    const svg = svgRef.current
+    if (!svg || !scene) return
+    const rect = svg.getBoundingClientRect()
+    const x = ((clientX - rect.left) / rect.width) * W
+    const y = ((clientY - rect.top) / rect.height) * H
+    const points = trackPoints({ lat: scene.fromLat, lon: scene.fromLon }, { lat: scene.toLat, lon: scene.toLon }, 80)
+    let best = 0
+    let bestDistance = Infinity
+    points.forEach((point, index) => {
+      const placed = project(point.lat, point.lon, W, H)
+      const distance = (placed.x - x) ** 2 + (placed.y - y) ** 2
+      if (distance < bestDistance) {
+        bestDistance = distance
+        best = index
+      }
+    })
+    setAlong(best / (points.length - 1))
   }
 
   function surprise() {
@@ -96,44 +161,62 @@ export function RouteStudio({ scenes, active, initialCustom = null }: { scenes: 
     let next = index
     while (next === index) next = Math.floor(Math.random() * scenes.length)
     setCustom(null)
+    setPlaying(false)
     setIndex(next)
     setFromCode(scenes[next].from)
     setToCode(scenes[next].to)
-    setAlong(0.35)
+    setAlong(0.28)
   }
 
-  if (!scene || !plane) return null
+  if (!scene || !geometry) return null
+  const flownNm = Math.round(scene.nm * along)
+  const leftNm = scene.nm - flownNm
 
   return (
     <section className="stage">
-      <div className="desktop">
-        <div className="menubar">
-          <span>Meridian</span>
-          <span>Chart</span>
-          <span>Sky</span>
-          <span>Book</span>
-          <span className="menu-clock">{now || "—"}</span>
-        </div>
-        <svg className="scene-chart" viewBox={`0 0 ${plane.w} ${plane.h}`} role="img" aria-label={`${scene.from} to ${scene.to}`}>
-          <rect width={plane.w} height={plane.h} fill="#202429" />
-          {[80, 160, 240, 320, 400].map((y) => (
-            <line key={y} x1="0" x2={plane.w} y1={y} y2={y} stroke="#2c363c" strokeWidth="1" />
-          ))}
-          {plane.wrap ? null : (
-            <path d={`M ${plane.a.x} ${plane.a.y} Q ${plane.c.x} ${plane.c.y} ${plane.b.x} ${plane.b.y}`} fill="none" stroke="#e2a23a" strokeWidth="3" />
-          )}
-          <circle cx={plane.a.x} cy={plane.a.y} r="6" fill="#f4f1ea" />
-          <circle cx={plane.b.x} cy={plane.b.y} r="6" fill="#7ec8c3" />
-          <circle cx={plane.dot.x} cy={plane.dot.y} r="8" fill="#e2a23a" />
-          <text x="28" y="54" fill="#f4f1ea" fontSize="28">{scene.from}</text>
-          <text x="28" y="84" fill="#9eacb3" fontSize="16">{scene.fromCity}</text>
-          <text x={plane.w - 28} y="54" fill="#7ec8c3" fontSize="28" textAnchor="end">{scene.to}</text>
-          <text x={plane.w - 28} y="84" fill="#9eacb3" fontSize="16" textAnchor="end">{scene.toCity}</text>
+      <div className="chart-frame" data-ui="chart">
+        <svg
+          ref={svgRef}
+          className="scene-chart"
+          viewBox={`0 0 ${W} ${H}`}
+          role="img"
+          aria-label={`${scene.fromCity} to ${scene.toCity}, ${Math.round(along * 100)} percent of the way`}
+          onPointerDown={(event) => {
+            setPlaying(false)
+            setDragging(true)
+            event.currentTarget.setPointerCapture(event.pointerId)
+            placeAt(event.clientX, event.clientY)
+          }}
+          onPointerMove={(event) => {
+            if (dragging) placeAt(event.clientX, event.clientY)
+          }}
+          onPointerUp={() => setDragging(false)}
+        >
+          <rect width={W} height={H} fill="#0c1216" />
+          {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((lon) => {
+            const x = project(0, lon > 180 ? lon - 360 : lon, W, H).x
+            return <line key={`lon${lon}`} x1={x} x2={x} y1="0" y2={H} stroke="#1a262c" strokeWidth="1" />
+          })}
+          {[-60, -30, 0, 30, 60].map((lat) => {
+            const y = project(lat, 0, W, H).y
+            return <line key={`lat${lat}`} x1="0" x2={W} y1={y} y2={y} stroke="#1a262c" strokeWidth="1" />
+          })}
+          <path d={landPath} fill="#1b2c34" />
+          <path d={geometry.rest} fill="none" stroke="#8a6730" strokeWidth="2.5" />
+          <path d={geometry.flown} fill="none" stroke="#e2a23a" strokeWidth="3" />
+          <circle cx={geometry.from.x} cy={geometry.from.y} r="5" fill="#f4f1ea" />
+          <circle cx={geometry.to.x} cy={geometry.to.y} r="5" fill="#7ec8c3" />
+          <text x={geometry.from.x + 8} y={geometry.from.y - 8} fill="#f4f1ea" fontSize="14">{scene.from}</text>
+          <text x={geometry.to.x + 8} y={geometry.to.y - 8} fill="#7ec8c3" fontSize="14">{scene.to}</text>
+          <g transform={`translate(${geometry.herePoint.x} ${geometry.herePoint.y}) rotate(${geometry.angle})`}>
+            <path d="M 10 0 L -7 5 L -3 0 L -7 -5 Z" fill="#f4f1ea" />
+          </g>
         </svg>
-        <div className="dock" aria-hidden="true">
-          <span />
-          <span />
-          <span />
+        <div className="chart-read">
+          <strong>{formatPosition(geometry.here)}</strong>
+          <span>{geometry.heading}° now</span>
+          <span>{flownNm.toLocaleString("en-US")} nm flown</span>
+          <span>{leftNm.toLocaleString("en-US")} nm left</span>
         </div>
       </div>
       <aside className="scene-side">
@@ -146,14 +229,17 @@ export function RouteStudio({ scenes, active, initialCustom = null }: { scenes: 
               aria-selected={!custom && i === index}
               onClick={() => {
                 setCustom(null)
+                setPlaying(false)
                 setIndex(i)
                 setFromCode(item.from)
                 setToCode(item.to)
+                setAlong(0.28)
                 setNote("")
               }}
             >
               <b>{item.from}</b>
               <b>{item.to}</b>
+              <small>{item.nm.toLocaleString("en-US")} nm</small>
             </button>
           ))}
         </div>
@@ -162,8 +248,12 @@ export function RouteStudio({ scenes, active, initialCustom = null }: { scenes: 
           <br />
           {scene.toCity}
         </h2>
-        <p className="scene-by">{scene.from} to {scene.to}</p>
-        <p className="scene-kind">Great-circle track</p>
+        <p className="scene-by">
+          {scene.nm.toLocaleString("en-US")} nm · {scene.bearing}° off {scene.from} · {formatDuration(hours)} at {speed} kt
+        </p>
+        <p className="scene-kind">
+          {formatDuration(hours * along)} flown · {formatDuration(hours * (1 - along))} still to go. The line is the great circle, not a filed route.
+        </p>
         <form
           className="pair-form"
           onSubmit={(event) => {
@@ -171,31 +261,55 @@ export function RouteStudio({ scenes, active, initialCustom = null }: { scenes: 
             void drawPair(fromCode, toCode)
           }}
         >
-          <label>
-            From
-            <input value={fromCode} maxLength={4} aria-label="From airport" onChange={(event) => setFromCode(event.target.value.toUpperCase())} />
-          </label>
-          <label>
-            To
-            <input value={toCode} maxLength={4} aria-label="To airport" onChange={(event) => setToCode(event.target.value.toUpperCase())} />
-          </label>
+          <CodeField label="From" value={fromCode} onChange={setFromCode} onPick={(code) => void drawPair(code, toCode)} />
+          <CodeField label="To" value={toCode} onChange={setToCode} onPick={(code) => void drawPair(fromCode, code)} />
           <button type="submit">Draw</button>
         </form>
         {note ? <p className="scene-note">{note}</p> : null}
+        <div className="tool-row">
+          <button
+            type="button"
+            onClick={() => {
+              const nextFrom = toCode
+              const nextTo = fromCode
+              setFromCode(nextFrom)
+              setToCode(nextTo)
+              void drawPair(nextFrom, nextTo)
+            }}
+          >
+            Swap
+          </button>
+          <button
+            type="button"
+            aria-pressed={playing}
+            onClick={() => {
+              if (along >= 0.995) setAlong(0)
+              setPlaying((value) => !value)
+            }}
+          >
+            {playing ? "Pause" : "Fly"}
+          </button>
+          <button type="button" onClick={surprise}>Surprise me</button>
+        </div>
         <label className="slider">
           Speed {speed} kt
-          <input type="range" min={280} max={560} step={10} value={speed} onChange={(event) => setSpeed(Number(event.target.value))} />
+          <input type="range" min={280} max={560} step={10} value={speed} aria-valuetext={`${speed} knots`} onChange={(event) => setSpeed(Number(event.target.value))} />
         </label>
         <label className="slider">
-          Along the track
-          <input type="range" min={0} max={100} value={Math.round(along * 100)} onChange={(event) => setAlong(Number(event.target.value) / 100)} />
+          Along the track, {Math.round(along * 100)} percent
+          <input
+            type="range"
+            min={0}
+            max={100}
+            value={Math.round(along * 100)}
+            aria-valuetext={`${Math.round(along * 100)} percent`}
+            onChange={(event) => {
+              setPlaying(false)
+              setAlong(Number(event.target.value) / 100)
+            }}
+          />
         </label>
-        <p className="scene-note">
-          {scene.nm.toLocaleString("en-US")} nm · {scene.bearing}° · about {hours} h at {speed} kt. Not a filed route.
-        </p>
-        <button type="button" className="btn" onClick={surprise}>
-          Surprise me
-        </button>
+        <p className="scene-note">Drag the chart, or press space to fly it. Left and right change the saved pair.</p>
       </aside>
     </section>
   )

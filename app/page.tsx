@@ -5,29 +5,29 @@ const doors = [
     href: "/chart",
     title: "Chart",
     line: "Draw a great-circle between two airports.",
-    src: "/atlas/edinburgh-airport-the-apron-at-night-geograph.jpg",
-    alt: "An easyJet aircraft on the Edinburgh apron at night, stairs at the forward door",
+    src: "/atlas/haneda-lineup.jpg",
+    alt: "An airliner holding short of the runway at Haneda, centreline lights in the foreground",
     wide: true,
   },
   {
     href: "/fields",
     title: "Fields",
     line: "Fourteen public places, and nowhere else.",
-    src: "/atlas/night-apron-img-4779-15475261209.jpg",
+    src: "/atlas/sumburgh-beach.jpg",
     alt: "Sumburgh Airport at dusk, seen from the beach with the sea in front",
   },
   {
     href: "/desk",
     title: "Desk",
     line: "The Mac app, version 0.2.",
-    src: "/atlas/sturup-airport-by-night.jpg",
-    alt: "An SAS aircraft at Malmö Airport under the floodlights",
+    src: "/atlas/dulles-dusk.jpg",
+    alt: "The main terminal at Washington Dulles at dusk, with light trails on the approach road",
   },
   {
     href: "/book",
     title: "Book",
     line: "Airports, airlines, and airframes.",
-    src: "/atlas/airplanes-of-united-airlines-in-tarmac-at.jpg",
+    src: "/atlas/narita-apron.jpg",
     alt: "United aircraft on the Narita apron at night",
   },
 ]
@@ -37,10 +37,11 @@ export default function Home() {
     <>
       <section className="cover">
         <img
-          src="/atlas/airplanes-of-united-airlines-in-tarmac-at.jpg"
-          alt="Two United aircraft parked on the Narita apron at night"
-          width={1920}
-          height={1280}
+          src="/atlas/barcelona-night.jpg"
+          alt="Barcelona airport at night, seen from the air, runways and stands lit in amber"
+          width={2800}
+          height={1570}
+          style={{ objectPosition: "center 62%" }}
         />
         <div className="cover-copy">
           <p className="eyebrow">Meridian</p>

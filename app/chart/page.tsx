@@ -37,10 +37,11 @@ export default async function ChartPage({ searchParams }: { searchParams: Promis
     <>
       <section className="page-intro">
         <img
-          src="/atlas/edinburgh-airport-the-apron-at-night-geograph.jpg"
-          alt="Night turnaround on the Edinburgh apron"
-          width={1600}
-          height={1200}
+          src="/atlas/boston-approach.jpg"
+          alt="A Delta A220 on approach to Boston in fog, landing lights reflected on the water"
+          width={2800}
+          height={1866}
+          style={{ objectPosition: "center 42%" }}
         />
         <div>
           <h1>Chart</h1>

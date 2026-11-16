@@ -33,7 +33,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
       </header>
       <main>{children}</main>
       <footer className="colophon">
-        <p>Narita apron by Nanashinodensyaku. Edinburgh apron by M J Richardson. Malmö by Niklas Morberg. Sumburgh by Ronnie Robertson. All CC BY-SA, via Wikimedia Commons.</p>
+        <p>Barcelona by Mike McBey, CC BY 2.0. Haneda by contri, CC BY-SA 2.0. Boston by 4300streetcar, CC BY 4.0. Dulles by Joe Ravi, CC BY-SA 3.0. Narita by Nanashinodensyaku, CC BY-SA 4.0. Sumburgh by Ronnie Robertson, CC BY-SA 2.0. Via Wikimedia Commons.</p>
       </footer>
     </>
   )

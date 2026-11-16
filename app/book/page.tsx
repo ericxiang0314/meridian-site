@@ -8,9 +8,16 @@ export const metadata: Metadata = { title: "Book" }
 export default async function BookPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const q = ((await searchParams).q ?? "").trim()
   return (
+    <>
+    <section className="page-intro">
+      <img src="/atlas/narita-apron.jpg" alt="United aircraft parked on the Narita apron at night" width={2800} height={1866} />
+      <div>
+        <h1>Book</h1>
+        <p>Airports, airlines, and the airframes that carry them.</p>
+      </div>
+    </section>
     <div className="sheet">
     <header className="sheet-intro">
-      <h1>Book</h1>
       <p>
         <Link href="/book/airports">Airports</Link>
         {" · "}
@@ -24,5 +31,6 @@ export default async function BookPage({ searchParams }: { searchParams: Promise
       initial={{ airports: searchAirports(q), airlines: searchAirlines(q), types: searchTypes(q) }}
     />
     </div>
+    </>
   )
 }

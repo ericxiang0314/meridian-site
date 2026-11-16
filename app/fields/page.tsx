@@ -9,7 +9,7 @@ export default function FieldsPage() {
   return (
     <>
       <section className="page-intro">
-        <img src="/atlas/night-apron-img-4779-15475261209.jpg" alt="Sumburgh Airport from the public beach at dusk" width={1600} height={870} />
+        <img src="/atlas/sumburgh-beach.jpg" alt="Sumburgh Airport from the public beach at dusk" width={2800} height={1524} />
         <div>
           <h1>Fields</h1>
           <p>A public place, or none. The beach in front of Sumburgh is the kind of edge these notes mean.</p>

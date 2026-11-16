@@ -23,6 +23,7 @@ export function AirportBrowser({ letter, airports }: { letter: string; airports:
   const [hemisphere, setHemisphere] = useState<(typeof hemispheres)[number]>("all")
   const [side, setSide] = useState<(typeof sides)[number]>("all")
   const [near, setNear] = useState(false)
+  const [sort, setSort] = useState<"city" | "near">("city")
   const [query, setQuery] = useState("")
 
   const shown = useMemo(() => {
@@ -33,8 +34,8 @@ export function AirportBrowser({ letter, airports }: { letter: string; airports:
       .filter((row) => (side === "all" ? true : row.side === side))
       .filter((row) => (near ? row.fromHkgNm <= 1500 : true))
       .filter((row) => (q ? `${row.iata} ${row.city} ${row.name}`.toLowerCase().includes(q) : true))
-      .sort((a, b) => a.fromHkgNm - b.fromHkgNm)
-  }, [airports, band, hemisphere, side, near, query])
+      .sort((a, b) => (sort === "near" ? a.fromHkgNm - b.fromHkgNm : a.city.localeCompare(b.city) || a.iata.localeCompare(b.iata)))
+  }, [airports, band, hemisphere, side, near, query, sort])
 
   return (
     <div className="browser">
@@ -57,6 +58,8 @@ export function AirportBrowser({ letter, airports }: { letter: string; airports:
         <button type="button" aria-pressed={near} onClick={() => setNear((value) => !value)}>
           Within 1,500 nm of Hong Kong
         </button>
+        <button type="button" aria-pressed={sort === "city"} onClick={() => setSort("city")}>By city</button>
+        <button type="button" aria-pressed={sort === "near"} onClick={() => setSort("near")}>Nearest Hong Kong</button>
       </div>
       <form className="find inline" onSubmit={(event) => event.preventDefault()}>
         <input value={query} placeholder={`Filter ${letter}`} aria-label={`Filter airports under ${letter}`} onChange={(event) => setQuery(event.target.value)} />
