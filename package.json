@@ -4,7 +4,6 @@
   "private": true,
   "scripts": {
     "db:seed": "node db/seed.mjs",
-    "postinstall": "node db/seed.mjs",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",

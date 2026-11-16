@@ -1,5 +1,7 @@
-import { DatabaseSync } from "node:sqlite"
-import { join } from "node:path"
+import airportsJson from "@/data/source/airports.json"
+import airlinesJson from "@/data/source/airlines.json"
+import typesJson from "@/data/source/aircraft-types.json"
+import fieldsJson from "@/data/source/fields.json"
 
 export type Airport = {
   iata: string
@@ -14,106 +16,87 @@ export type Airline = { iata: string; icao: string; name: string }
 export type Airframe = { code: string; name: string }
 export type Field = { iata: string; name: string; stand: string; when_text: string; note: string }
 
-let db: DatabaseSync | null = null
+const airports = airportsJson as Airport[]
+const airportMap = new Map(airports.map((row) => [row.iata, row]))
 
-function database(): DatabaseSync {
-  if (!db) db = new DatabaseSync(join(process.cwd(), "data", "meridian.db"), { readOnly: true })
-  return db
-}
+const airlines: Airline[] = Object.entries(airlinesJson as Record<string, { icao?: string; name: string }>).map(
+  ([iata, row]) => ({ iata, icao: row.icao ?? "", name: row.name }),
+)
+const airlineMap = new Map(airlines.map((row) => [row.iata, row]))
 
-function count(sql: string): number {
-  const row = database().prepare(sql).get() as { n: number } | undefined
-  return Number(row?.n ?? 0)
+const types: Airframe[] = Object.entries(typesJson as Record<string, string>).map(([code, name]) => ({ code, name }))
+
+const fields: Field[] = (fieldsJson as Array<{ iata: string; name: string; stand: string; when: string; note: string }>)
+  .map((row) => ({ iata: row.iata, name: row.name, stand: row.stand, when_text: row.when, note: row.note }))
+  .sort((a, b) => a.name.localeCompare(b.name))
+const fieldMap = new Map(fields.map((row) => [row.iata, row]))
+
+const featuredAirports = ["HKG", "PVG", "PEK", "PKX", "CAN", "HND", "NRT", "ICN", "SIN", "BKK", "LHR", "FRA", "LAX", "DXB", "JFK", "SFO", "CDG", "AMS"]
+const featuredAirlines = ["CX", "CA", "MU", "CZ", "NH", "JL", "KE", "SQ", "EK", "QR", "BA", "LH", "AF", "UA", "AA", "DL"]
+
+function includes(value: string, query: string): boolean {
+  return value.toLowerCase().includes(query.toLowerCase())
 }
 
 export function counts(): { airports: number; airlines: number; types: number; fields: number } {
-  return {
-    airports: count("SELECT COUNT(*) AS n FROM airports"),
-    airlines: count("SELECT COUNT(*) AS n FROM airlines"),
-    types: count("SELECT COUNT(*) AS n FROM types"),
-    fields: count("SELECT COUNT(*) AS n FROM fields"),
-  }
+  return { airports: airports.length, airlines: airlines.length, types: types.length, fields: fields.length }
 }
 
 export function airportByIata(code: string): Airport | null {
-  const row = database().prepare("SELECT iata, name, city, tz, lat, lon FROM airports WHERE iata = ?").get(code.toUpperCase())
-  return (row as Airport | undefined) ?? null
+  return airportMap.get(code.trim().toUpperCase()) ?? null
 }
 
 export function airlineByIata(code: string): Airline | null {
-  const row = database().prepare("SELECT iata, icao, name FROM airlines WHERE iata = ?").get(code.toUpperCase())
-  return (row as Airline | undefined) ?? null
+  return airlineMap.get(code.trim().toUpperCase()) ?? null
 }
 
 export function fieldByIata(code: string): Field | null {
-  const row = database().prepare("SELECT iata, name, stand, when_text, note FROM fields WHERE iata = ?").get(code.toUpperCase())
-  return (row as Field | undefined) ?? null
+  return fieldMap.get(code.trim().toUpperCase()) ?? null
 }
 
 export function allFields(): Field[] {
-  return database().prepare("SELECT iata, name, stand, when_text, note FROM fields ORDER BY name").all() as Field[]
+  return fields
 }
 
 export function searchAirports(query: string, limit = 12): Airport[] {
   const q = query.trim()
   if (!q) {
-    return database()
-      .prepare(
-        `SELECT iata, name, city, tz, lat, lon FROM airports
-         WHERE iata IN ('HKG','PVG','PEK','PKX','CAN','HND','NRT','ICN','SIN','BKK','LHR','FRA','LAX','DXB','JFK','SFO','CDG','AMS')
-         ORDER BY city`,
-      )
-      .all() as Airport[]
+    return featuredAirports.map((code) => airportMap.get(code)).filter((row): row is Airport => row != null)
   }
-  const like = `%${q.replace(/[%_]/g, "")}%`
-  return database()
-    .prepare(
-      `SELECT iata, name, city, tz, lat, lon FROM airports
-       WHERE iata = ? OR city LIKE ? OR name LIKE ?
-       ORDER BY CASE WHEN iata = ? THEN 0 ELSE 1 END, city
-       LIMIT ?`,
-    )
-    .all(q.toUpperCase(), like, like, q.toUpperCase(), limit) as Airport[]
+  const exact = q.toUpperCase()
+  return airports
+    .filter((row) => row.iata === exact || includes(row.city, q) || includes(row.name, q))
+    .sort((a, b) => Number(b.iata === exact) - Number(a.iata === exact) || a.city.localeCompare(b.city))
+    .slice(0, limit)
 }
 
 export function searchAirlines(query: string, limit = 12): Airline[] {
   const q = query.trim()
   if (!q) {
-    return database()
-      .prepare(
-        `SELECT iata, icao, name FROM airlines
-         WHERE iata IN ('CX','CA','MU','CZ','NH','JL','KE','SQ','EK','QR','BA','LH','AF','UA','AA','DL')
-         ORDER BY name`,
-      )
-      .all() as Airline[]
+    return featuredAirlines
+      .map((code) => airlineMap.get(code))
+      .filter((row): row is Airline => row != null)
+      .sort((a, b) => a.name.localeCompare(b.name))
   }
-  const like = `%${q.replace(/[%_]/g, "")}%`
-  return database()
-    .prepare(
-      `SELECT iata, icao, name FROM airlines
-       WHERE iata = ? OR icao = ? OR name LIKE ?
-       ORDER BY CASE WHEN iata = ? THEN 0 ELSE 1 END, name
-       LIMIT ?`,
-    )
-    .all(q.toUpperCase(), q.toUpperCase(), like, q.toUpperCase(), limit) as Airline[]
+  const exact = q.toUpperCase()
+  return airlines
+    .filter((row) => row.iata === exact || row.icao === exact || includes(row.name, q))
+    .sort((a, b) => Number(b.iata === exact) - Number(a.iata === exact) || a.name.localeCompare(b.name))
+    .slice(0, limit)
 }
 
 export function searchTypes(query: string, limit = 8): Airframe[] {
   const q = query.trim()
   if (q.length < 2) return []
-  const like = `%${q.replace(/[%_]/g, "")}%`
-  return database()
-    .prepare(
-      `SELECT code, name FROM types
-       WHERE code = ? OR name LIKE ?
-       ORDER BY CASE WHEN code = ? THEN 0 ELSE 1 END, code
-       LIMIT ?`,
-    )
-    .all(q.toUpperCase(), like, q.toUpperCase(), limit) as Airframe[]
+  const exact = q.toUpperCase()
+  return types
+    .filter((row) => row.code === exact || includes(row.name, q))
+    .sort((a, b) => Number(b.code === exact) - Number(a.code === exact) || a.code.localeCompare(b.code))
+    .slice(0, limit)
 }
 
 export function hubs(): Airport[] {
-  const codes = ["HKG", "PVG", "NRT", "LHR", "LAX", "DXB"]
-  const stmt = database().prepare("SELECT iata, name, city, tz, lat, lon FROM airports WHERE iata = ?")
-  return codes.map((code) => stmt.get(code) as Airport).filter(Boolean)
+  return ["HKG", "PVG", "NRT", "LHR", "LAX", "DXB"]
+    .map((code) => airportMap.get(code))
+    .filter((row): row is Airport => row != null)
 }
