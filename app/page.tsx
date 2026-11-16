@@ -1,5 +1,6 @@
 import Link from "next/link"
-import { Stage, type Scene } from "@/components/Stage"
+import { RouteStudio } from "@/components/RouteStudio"
+import type { Scene } from "@/components/Stage"
 import { airportByIata } from "@/lib/db"
 import { haversineNm, initialBearing } from "@/lib/geo"
 
@@ -53,7 +54,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
         </div>
         <p className="reqs">Mac app · Version 0.2 · Personal</p>
       </section>
-      <Stage scenes={scenes} active={active} />
+      <RouteStudio scenes={scenes} active={active} />
       <section className="know">
         <h2>Good to know.</h2>
         <p>A few things before you open a flight.</p>
