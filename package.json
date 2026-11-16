@@ -1,0 +1,25 @@
+{
+  "name": "meridian-site",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "db:seed": "node db/seed.mjs",
+    "postinstall": "node db/seed.mjs",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "check": "node db/check.mjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "next": "^15.5.6",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.6.0",
+    "@types/react": "^19.1.16",
+    "@types/react-dom": "^19.1.9",
+    "typescript": "^5.9.2"
+  }
+}

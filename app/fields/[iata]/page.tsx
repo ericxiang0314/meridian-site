@@ -1,0 +1,36 @@
+import type { Metadata } from "next"
+import Link from "next/link"
+import { notFound } from "next/navigation"
+import { PageHead } from "@/components/PageHead"
+import { airportByIata, fieldByIata } from "@/lib/db"
+
+type Params = { params: Promise<{ iata: string }> }
+
+export async function generateMetadata({ params }: Params): Promise<Metadata> {
+  const field = fieldByIata((await params).iata)
+  return { title: field ? field.name : "Field" }
+}
+
+export default async function FieldPage({ params }: Params) {
+  const field = fieldByIata((await params).iata)
+  if (!field) notFound()
+  const airport = airportByIata(field.iata)
+  return (
+    <>
+      <PageHead title="Meridian" />
+      <article className="record">
+        <div>
+          <h1>{field.iata}</h1>
+          <p>{field.name}</p>
+          <p>{airport ? airport.name : ""}</p>
+        </div>
+        <div className="paper">
+          <h2>{field.stand}</h2>
+          <p>{field.when_text}</p>
+          <p>{field.note}</p>
+          {airport ? <Link href={`/book/airports/${airport.iata}`}>The airport in the book</Link> : null}
+        </div>
+      </article>
+    </>
+  )
+}
