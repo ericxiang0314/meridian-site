@@ -22,8 +22,8 @@ export default function DeskPage() {
           <p>The Mac app is the working desk: a chart, a sky list, a flight card, and the book of airframes stamped onto each row.</p>
         </div>
         <div>
-          <h1>On this Mac</h1>
-          <p>Keys 1 to 7 move among the chart, the airports, the airlines, the sky, the history, the library, and settings.</p>
+          <h2>On this Mac</h2>
+          <p>Keys 1 to 7 move among the map, the airports, the airlines, the sky, the history, the library, and settings.</p>
           <p>A click on empty chart clears the flight. The height filter is Any, Low, or High, and the sky list follows it.</p>
           <p>Version 0.2 keeps a Natural Earth chart for the middle zoom and the aircraft book beside the live row.</p>
           <Link className="action" href="/book">Open the book</Link>
