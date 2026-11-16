@@ -6,7 +6,7 @@ import { publicPath } from "@/lib/public-path"
 export const metadata: Metadata = { title: "Fields" }
 
 export default function FieldsPage() {
-  const fields = allFields().map((field) => ({ iata: field.iata, name: field.name, stand: field.stand }))
+  const fields = allFields().map((field) => ({ iata: field.iata, name: field.name, stand: field.stand, note: field.note }))
   return (
     <>
       <section className="page-intro">
@@ -16,7 +16,7 @@ export default function FieldsPage() {
           <p>A public place, or none. The beach in front of Sumburgh is the kind of edge these notes mean.</p>
         </div>
       </section>
-      <div className="sheet">
+      <div className="sheet sheet-follow">
         <FieldFilter fields={fields} />
       </div>
     </>

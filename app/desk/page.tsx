@@ -5,31 +5,46 @@ import { publicPath } from "@/lib/public-path"
 
 export const metadata: Metadata = { title: "The desk" }
 
+const keys = [
+  ["1", "Map", "A Natural Earth chart at the middle zoom. Click empty chart and the flight clears."],
+  ["2", "Airports", "The same book as this site: name, city, and the place you can stand."],
+  ["3", "Airlines", "The mark on the tail, matched from the callsign rather than the first two letters."],
+  ["4", "Sky", "The airborne list. The height filter is Any, Low, or High, and the list follows it."],
+  ["5", "History", "Flights and aircraft already opened on this Mac."],
+  ["6", "Library", "The watch list, and the airframe book beside the live row."],
+  ["7", "Settings", "How this copy of the desk behaves."],
+]
+
 export default function DeskPage() {
   return (
     <>
       <section className="page-intro">
         <img src={publicPath("/atlas/dulles-dusk.jpg")} alt="Washington Dulles at dusk, the terminal roof and the tower above the approach road" width={2800} height={1662} />
         <div>
-          <h1>Desk</h1>
-          <p>The Mac app is the working copy of this atlas.</p>
+          <h1>The desk</h1>
+          <p>Version 0.2 for the Mac. The site is the atlas. The app is the shift.</p>
         </div>
       </section>
-      <div className="sheet">
-      <article className="record">
-        <div className="paper">
-          <h2>The desk</h2>
+      <div className="sheet sheet-follow">
+        <div className="inset paper">
+          <h2>A flight card</h2>
           <Strip flight="CX830" airline="Cathay Pacific" from="Hong Kong" to="London" nm={5994} />
-          <p>The Mac app is the working desk: a chart, a sky list, a flight card, and the book of airframes stamped onto each row.</p>
+          <p>The card names the flight, the airline, and the distance. Height and speed appear when the feed has them.</p>
         </div>
-        <div>
-          <h2>On this Mac</h2>
-          <p>Keys 1 to 7 move among the map, the airports, the airlines, the sky, the history, the library, and settings.</p>
-          <p>A click on empty chart clears the flight. The height filter is Any, Low, or High, and the sky list follows it.</p>
-          <p>Version 0.2 keeps a Natural Earth chart for the middle zoom and the aircraft book beside the live row.</p>
-          <Link className="action" href="/book">Open the book</Link>
-        </div>
-      </article>
+        <ol className="keys">
+          {keys.map(([key, name, line]) => (
+            <li key={key}>
+              <kbd>{key}</kbd>
+              <span>
+                <b>{name}</b>
+                {line}
+              </span>
+            </li>
+          ))}
+        </ol>
+        <p className="inset">
+          <Link className="action" href="/chart">Open the chart</Link>
+        </p>
       </div>
     </>
   )

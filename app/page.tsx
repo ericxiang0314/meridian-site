@@ -29,6 +29,32 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="ledger">
+        <div>
+          <h2>Seven keys</h2>
+          <p>The Mac app is arranged the way a night shift is arranged. The number is the key on the keyboard.</p>
+        </div>
+        <ol>
+          {[
+            ["1", "Map", "The chart, the great circle, and the aircraft moving along it."],
+            ["2", "Airports", "Every field the desk can name, with the clock and the neighbours."],
+            ["3", "Airlines", "The designator on the flight, and the callsign on the radio."],
+            ["4", "Sky", "The live list. Any height, or only the low ones, or only the high ones."],
+            ["5", "History", "Flights and airframes you have already opened."],
+            ["6", "Library", "What you are watching, and the type stamped on the row."],
+            ["7", "Settings", "The desk, set for this Mac."],
+          ].map(([key, name, line]) => (
+            <li key={key}>
+              <kbd>{key}</kbd>
+              <span>
+                <b>{name}</b>
+                {line}
+              </span>
+            </li>
+          ))}
+        </ol>
+      </section>
+
       <section className="band">
         <figure>
           <img src={publicPath("/atlas/haneda-lineup.jpg")} alt="An airliner holding on the runway lights at Haneda" width={2800} height={1849} />

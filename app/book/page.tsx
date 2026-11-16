@@ -2,12 +2,19 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { Suspense } from "react"
 import { BookSearch } from "@/components/BookSearch"
+import { atlasCounts } from "@/lib/atlas"
 import { searchAirlines, searchAirports, searchTypes } from "@/lib/db"
 import { publicPath } from "@/lib/public-path"
 
 export const metadata: Metadata = { title: "Book" }
 
 export default function BookPage() {
+  const counts = atlasCounts()
+  const shelves = [
+    { href: "/book/airports", count: counts.airports, label: "Airports", line: "By letter, by latitude, and by distance from Hong Kong." },
+    { href: "/book/airlines", count: counts.airlines, label: "Airlines", line: "The designator, and the callsign the desk hears." },
+    { href: "/book/types", count: counts.types, label: "Airframes", line: "Type codes, grouped by the maker on the nose." },
+  ]
   return (
     <>
     <section className="page-intro">
@@ -17,16 +24,16 @@ export default function BookPage() {
         <p>Airports, airlines, and the airframes that carry them.</p>
       </div>
     </section>
-    <div className="sheet">
-    <header className="sheet-intro">
-      <p>
-        <Link href="/book/airports">Airports</Link>
-        {" · "}
-        <Link href="/book/airlines">Airlines</Link>
-        {" · "}
-        <Link href="/book/types">Airframes</Link>
-      </p>
-    </header>
+    <div className="sheet sheet-follow">
+    <div className="index-row">
+      {shelves.map((shelf) => (
+        <Link key={shelf.href} href={shelf.href}>
+          <strong>{shelf.count.toLocaleString("en-US")}</strong>
+          <b>{shelf.label}</b>
+          <span>{shelf.line}</span>
+        </Link>
+      ))}
+    </div>
     <Suspense fallback={null}>
     <BookSearch
       initialQuery=""

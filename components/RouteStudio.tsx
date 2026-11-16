@@ -244,8 +244,7 @@ export function RouteStudio({ scenes, active, initialCustom = null }: { scenes: 
                 setNote("")
               }}
             >
-              <b>{item.from}</b>
-              <b>{item.to}</b>
+              <b>{item.from}–{item.to}</b>
               <small>{item.nm.toLocaleString("en-US")} nm</small>
             </button>
           ))}
