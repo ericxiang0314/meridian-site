@@ -7,6 +7,9 @@ import { searchAirlines, searchAirports, searchTypes } from "@/lib/db"
 
 type Hit = { iata: string; city?: string; name: string; icao?: string; code?: string }
 type Payload = { airports: Hit[]; airlines: Hit[]; types: Array<{ code: string; name: string }> }
+type Scope = "All" | "Airports" | "Airlines" | "Airframes"
+
+const scopes: Scope[] = ["All", "Airports", "Airlines", "Airframes"]
 
 function lookup(value: string): Payload {
   return {
@@ -20,9 +23,18 @@ export function BookSearch({ initialQuery, initial }: { initialQuery: string; in
   const params = useSearchParams()
   const starting = params.get("q") ?? initialQuery
   const [query, setQuery] = useState(starting)
+  const [scope, setScope] = useState<Scope>("All")
   const [rows, setRows] = useState<Payload>(() => (starting ? lookup(starting) : initial))
 
+  const asked = query.trim().length > 0
   const shown = useMemo(() => rows, [rows])
+  function show(kind: "airports" | "airlines" | "types", count: number) {
+    if (scope === "Airports") return kind === "airports"
+    if (scope === "Airlines") return kind === "airlines"
+    if (scope === "Airframes") return kind === "types"
+    if (!asked) return kind !== "types"
+    return count > 0
+  }
 
   function run(value: string) {
     setQuery(value)
@@ -47,30 +59,41 @@ export function BookSearch({ initialQuery, initial }: { initialQuery: string; in
           />
           <button type="submit">Look up</button>
         </form>
+        <div className="filters" role="group" aria-label="What to search">
+          {scopes.map((item) => (
+            <button key={item} type="button" aria-pressed={scope === item} onClick={() => setScope(item)}>
+              {item}
+            </button>
+          ))}
+        </div>
       </section>
       <section className="results">
-        <div>
-          <h2>Airports</h2>
-          {shown.airports.length === 0 ? <p>No airport by that name.</p> : shown.airports.map((row) => (
-            <Link className="hit" href={`/book/airports/${row.iata}`} key={row.iata}>
-              <b>{row.iata}</b>
-              <span>{row.city ? `${row.city} / ${row.name}` : row.name}</span>
-            </Link>
-          ))}
-        </div>
-        <div>
-          <h2>Airlines</h2>
-          {shown.airlines.length === 0 ? <p>No airline by that name.</p> : shown.airlines.map((row) => (
-            <Link className="hit" href={`/book/airlines/${row.iata}`} key={row.iata}>
-              <b>{row.iata}</b>
-              <span>{row.name}{row.icao ? ` / ${row.icao}` : ""}</span>
-            </Link>
-          ))}
-        </div>
-        {shown.types.length > 0 ? (
+        {show("airports", shown.airports.length) ? (
+          <div>
+            <h2>Airports</h2>
+            {shown.airports.length === 0 ? <p>No airport by that name.</p> : shown.airports.map((row) => (
+              <Link className="hit" href={`/book/airports/${row.iata}`} key={row.iata}>
+                <b>{row.iata}</b>
+                <span>{row.city ? `${row.city} / ${row.name}` : row.name}</span>
+              </Link>
+            ))}
+          </div>
+        ) : null}
+        {show("airlines", shown.airlines.length) ? (
+          <div>
+            <h2>Airlines</h2>
+            {shown.airlines.length === 0 ? <p>No airline by that name.</p> : shown.airlines.map((row) => (
+              <Link className="hit" href={`/book/airlines/${row.iata}`} key={row.iata}>
+                <b>{row.iata}</b>
+                <span>{row.name}{row.icao ? ` / ${row.icao}` : ""}</span>
+              </Link>
+            ))}
+          </div>
+        ) : null}
+        {show("types", shown.types.length) ? (
           <div>
             <h2>Airframes</h2>
-            {shown.types.map((row) => (
+            {shown.types.length === 0 ? <p>No airframe by that name. Type at least two letters.</p> : shown.types.map((row) => (
               <Link className="hit" href={`/book/types/${row.code}`} key={row.code}>
                 <b>{row.code}</b>
                 <span>{row.name}</span>

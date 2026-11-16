@@ -281,7 +281,7 @@ img { display: block; max-width: 100%; }
   margin-left: auto;
   margin-right: auto;
 }
-.sheet > h2 {
+.sheet > h2, .inset h2 {
   margin-top: 8px;
   margin-bottom: 12px;
   font-family: var(--display);
@@ -450,6 +450,16 @@ img { display: block; max-width: 100%; }
 .desk-bar button[aria-selected="true"] { background: var(--paper); color: var(--ink); }
 .desk-bar button[aria-selected="true"]:hover { background: #fff; color: var(--ink); }
 .desk-map svg { width: 100%; height: auto; display: block; }
+.desk-map p button {
+  border: 0;
+  border-radius: 999px;
+  min-height: 32px;
+  padding: 0 12px;
+  background: var(--paper);
+  color: var(--ink);
+  cursor: pointer;
+}
+.desk-map p button[aria-pressed="true"] { background: var(--amber); }
 .desk-map p, .desk-sky > p, .desk-book > p {
   display: flex;
   flex-wrap: wrap;

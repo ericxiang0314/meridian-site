@@ -29,7 +29,13 @@ export default function DeskPage() {
         <div className="inset paper">
           <h2>A flight card</h2>
           <Strip flight="CX830" airline="Cathay Pacific" from="Hong Kong" to="London" nm={5994} />
-          <p>The card names the flight, the airline, and the distance. Height and speed appear when the feed has them.</p>
+          <p>An example card for Cathay Pacific 830. It is not a live flight. Height and speed appear on the Mac app only when a feed sent them.</p>
+        </div>
+        <div className="inset">
+          <h2>What is live</h2>
+          <p>The chart on this website is an example great circle. It does not read a radar feed.</p>
+          <p>Version 0.2 of the Mac app shows a position only when a feed sent it. The sky in view comes from adsb.lol and adsb.fi. The wider airborne picture comes from OpenSky. Boards come from FlightStats. Weather comes from aviationweather.gov. Airports, radio, navaids, and runways are OurAirports, public domain.</p>
+          <p>There is no public download and no price. The app is not being offered that way.</p>
         </div>
         <ol className="keys">
           {keys.map(([key, name, line]) => (

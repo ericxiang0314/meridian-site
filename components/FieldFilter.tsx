@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useMemo, useState } from "react"
 
-type Field = { iata: string; name: string; stand: string; note: string }
+type Field = { iata: string; name: string; stand: string; when: string; note: string }
 
 export function FieldFilter({ fields }: { fields: Field[] }) {
   const [query, setQuery] = useState("")
@@ -11,7 +11,7 @@ export function FieldFilter({ fields }: { fields: Field[] }) {
     const q = query.trim().toLowerCase()
     if (!q) return fields
     return fields.filter((field) =>
-      [field.iata, field.name, field.stand, field.note].some((value) => value.toLowerCase().includes(q)),
+      [field.iata, field.name, field.stand, field.when, field.note].some((value) => value.toLowerCase().includes(q)),
     )
   }, [fields, query])
   return (
@@ -28,7 +28,7 @@ export function FieldFilter({ fields }: { fields: Field[] }) {
           <b>{field.iata}</b>
           <span>
             {field.name}
-            <small>{field.stand}</small>
+            <small>{field.stand} {field.when}</small>
             <em>{field.note}</em>
           </span>
         </Link>

@@ -23,7 +23,7 @@ export default function ChartPage() {
         />
         <div>
           <h1>Chart</h1>
-          <p>Pick a pair, or type two codes. The line is the great circle, not a filed route.</p>
+          <p>An example great circle, not a live flight and not a filed route. Hong Kong to London starts at the same point as the example on the front page.</p>
         </div>
       </section>
       <Suspense fallback={null}>

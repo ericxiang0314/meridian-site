@@ -32,6 +32,7 @@ export default async function AirportPage({ params }: Params) {
           <p>{airport.city || "City not recorded"} · {airport.tz}</p>
           <p>{airport.lat.toFixed(2)}° {airport.hemisphere} / {Math.abs(airport.lon).toFixed(2)}° {airport.side}</p>
           <p>{airport.band} · {airport.fromHkgNm.toLocaleString("en-US")} nm from Hong Kong</p>
+          <p>A name in the book, not a live board.</p>
           <ClockBoard hubs={[{ iata: airport.iata, city: airport.city || airport.iata, tz: airport.tz }]} />
           {field ? <Link className="action" href={`/fields/${airport.iata}`}>The public place</Link> : null}
         </div>

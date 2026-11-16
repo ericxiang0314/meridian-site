@@ -6,7 +6,7 @@ import { publicPath } from "@/lib/public-path"
 export const metadata: Metadata = { title: "Fields" }
 
 export default function FieldsPage() {
-  const fields = allFields().map((field) => ({ iata: field.iata, name: field.name, stand: field.stand, note: field.note }))
+  const fields = allFields().map((field) => ({ iata: field.iata, name: field.name, stand: field.stand, when: field.when_text, note: field.note }))
   return (
     <>
       <section className="page-intro">

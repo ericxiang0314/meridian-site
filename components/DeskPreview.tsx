@@ -38,13 +38,14 @@ function chain(points: { lat: number; lon: number }[]): string {
 
 export function DeskPreview({ scene }: { scene: Scene }) {
   const [tab, setTab] = useState<"Map" | "Sky" | "Book">("Map")
-  const [along, setAlong] = useState(0.32)
+  const [along, setAlong] = useState(0.28)
+  const [playing, setPlaying] = useState(false)
   const [band, setBand] = useState<"Any" | "Low" | "High">("Any")
   const [query, setQuery] = useState("")
   const [hits, setHits] = useState<Hit[]>([])
 
   useEffect(() => {
-    if (tab !== "Map") return
+    if (tab !== "Map" || !playing) return
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
     let frame = 0
     let last = performance.now()
@@ -56,7 +57,7 @@ export function DeskPreview({ scene }: { scene: Scene }) {
     }
     frame = window.requestAnimationFrame(step)
     return () => window.cancelAnimationFrame(frame)
-  }, [tab])
+  }, [tab, playing])
 
   useEffect(() => {
     const q = query.trim()
@@ -80,7 +81,7 @@ export function DeskPreview({ scene }: { scene: Scene }) {
   const points = trackPoints(from, to, 80)
   const cut = Math.round(along * (points.length - 1))
   const here = pointAlong(from, to, along)
-  const ahead = pointAlong(from, to, Math.min(1, along + 0.02))
+  const ahead = pointAlong(from, to, Math.min(1, along + 0.012))
   const herePoint = project(here.lat, here.lon, W, H)
   const aheadPoint = project(ahead.lat, ahead.lon, W, H)
   const angle = (Math.atan2(aheadPoint.y - herePoint.y, aheadPoint.x - herePoint.x) * 180) / Math.PI
@@ -89,7 +90,7 @@ export function DeskPreview({ scene }: { scene: Scene }) {
   return (
     <div className="desk-preview" data-ui="desk">
       <div className="desk-bar" role="tablist" aria-label="Desk views">
-        <span>Meridian</span>
+        <span>Example</span>
         {(["Map", "Sky", "Book"] as const).map((item) => (
           <button key={item} type="button" role="tab" aria-selected={tab === item} onClick={() => setTab(item)}>
             {item}
@@ -110,9 +111,13 @@ export function DeskPreview({ scene }: { scene: Scene }) {
             </g>
           </svg>
           <p>
-            <strong>{scene.from} to {scene.to}</strong>
+            <strong>Example, not a live flight</strong>
+            <span>{scene.from} to {scene.to}</span>
             <span>{formatPosition(here)}</span>
-            <span>{initialBearing(here, to)}° · {scene.nm.toLocaleString("en-US")} nm</span>
+            <span>{initialBearing(here, ahead)}° now · {scene.nm.toLocaleString("en-US")} nm</span>
+            <button type="button" aria-pressed={playing} onClick={() => setPlaying((value) => !value)}>
+              {playing ? "Hold the example" : "Move the example"}
+            </button>
           </p>
         </div>
       ) : null}
@@ -136,7 +141,7 @@ export function DeskPreview({ scene }: { scene: Scene }) {
               </li>
             ))}
           </ul>
-          <p>A sample of the sky list. Low is under 18,000 ft. The Mac app reads the live feed.</p>
+          <p>Sample rows, not a live feed. Low is under 18,000 ft. The Mac app is the copy that reads a feed, and only when that feed sends a position.</p>
         </div>
       ) : null}
       {tab === "Book" ? (
