@@ -15,11 +15,11 @@ function pointOnCurve(a: { x: number; y: number }, c: { x: number; y: number }, 
   }
 }
 
-export function RouteStudio({ scenes, active }: { scenes: Scene[]; active: number }) {
+export function RouteStudio({ scenes, active, initialCustom = null }: { scenes: Scene[]; active: number; initialCustom?: Scene | null }) {
   const [index, setIndex] = useState(active)
-  const [custom, setCustom] = useState<Scene | null>(null)
-  const [fromCode, setFromCode] = useState(scenes[active]?.from ?? "")
-  const [toCode, setToCode] = useState(scenes[active]?.to ?? "")
+  const [custom, setCustom] = useState<Scene | null>(initialCustom)
+  const [fromCode, setFromCode] = useState(initialCustom?.from ?? scenes[active]?.from ?? "")
+  const [toCode, setToCode] = useState(initialCustom?.to ?? scenes[active]?.to ?? "")
   const [speed, setSpeed] = useState(480)
   const [along, setAlong] = useState(0.35)
   const [note, setNote] = useState("")
