@@ -25,7 +25,7 @@ export function TypeBrowser({ makers, types }: { makers: string[]; types: Row[] 
       <form className="find inline" onSubmit={(event) => event.preventDefault()}>
         <input value={query} placeholder="B738, A320, Caravan" aria-label="Filter airframes" onChange={(event) => setQuery(event.target.value)} />
       </form>
-      <p className="tally">{shown.length.toLocaleString("en-US")} airframes</p>
+      <p className="tally">{shown.length.toLocaleString("en-US")} {shown.length === 1 ? "airframe" : "airframes"}</p>
       <ul className="directory">
         {shown.map((row) => (
           <li key={row.code}>

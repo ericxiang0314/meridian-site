@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { Credit } from "@/components/Credit"
 import { FieldFilter } from "@/components/FieldFilter"
 import { allFields } from "@/lib/db"
 import { publicPath } from "@/lib/public-path"
@@ -10,10 +11,11 @@ export default function FieldsPage() {
   return (
     <>
       <section className="page-intro">
-        <img src={publicPath("/atlas/sumburgh-beach.jpg")} alt="Sumburgh Airport from the public beach at dusk" width={2800} height={1524} />
+        <img src={publicPath("/atlas/haneda-lineup.jpg")} alt="An airliner holding on the runway lights at Haneda at night" width={2800} height={1849} />
         <div>
           <h1>Fields</h1>
-          <p>A public place, or none. The beach in front of Sumburgh is the kind of edge these notes mean.</p>
+          <p>Fourteen public places, and nowhere else. Haneda keeps a deck a visitor can use. If a note does not name a place, there is not one.</p>
+          <Credit name="haneda" />
         </div>
       </section>
       <div className="sheet sheet-follow">

@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 export default async function TypePage({ params }: Params) {
   const row = typeRecord((await params).code)
   if (!row) notFound()
-  const siblings = typesForMaker(row.maker).filter((item) => item.code !== row.code).slice(0, 12)
+  const siblings = typesForMaker(row.maker).filter((item) => item.code !== row.code)
   return (
     <div className="sheet">
       <article className="record">

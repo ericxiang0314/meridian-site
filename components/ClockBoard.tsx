@@ -27,7 +27,7 @@ export function ClockBoard({ hubs }: { hubs: Hub[] }) {
         <li key={hub.iata}>
           <span>{hub.city || hub.iata}</span>
           <strong>{now ? face(hub.tz, now) : "--:--:--"}</strong>
-          <small>{hub.iata} · {hub.tz}</small>
+          <small>{hub.iata} · {hub.tz.split("/").pop()?.replace(/_/g, " ")}</small>
         </li>
       ))}
     </ul>

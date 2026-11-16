@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { Credit } from "@/components/Credit"
 import { DeskPreview } from "@/components/DeskPreview"
 import { atlasCounts } from "@/lib/atlas"
 import { publicPath } from "@/lib/public-path"
@@ -19,6 +20,7 @@ export default function Home() {
         <div className="product-copy">
           <h1>The night desk</h1>
           <p className="lede">Meridian is a flight desk for Mac, and the reference book beside it. Try the chart here. It draws a great circle. It is not live traffic. The Mac app, version 0.2, shows a position only when a feed sends one. That app is not offered as a download.</p>
+          <Credit name="barcelona" />
           <div className="cta-row">
             <Link className="btn solid" href="/chart">Try the chart</Link>
             <Link className="btn" href="/desk">About the Mac app</Link>
@@ -57,7 +59,7 @@ export default function Home() {
 
       <section className="band">
         <figure>
-          <img src={publicPath("/atlas/haneda-lineup.jpg")} alt="An airliner holding on the runway lights at Haneda" width={2800} height={1849} />
+          <img src={publicPath("/atlas/haneda-lineup.jpg")} alt="An airliner holding on the runway lights at Haneda" width={2800} height={1849} loading="lazy" />
         </figure>
         <div className="band-copy">
           <h2>The chart</h2>
@@ -68,7 +70,7 @@ export default function Home() {
 
       <section className="band flip">
         <figure>
-          <img src={publicPath("/atlas/narita-apron.jpg")} alt="United aircraft on the Narita apron at night" width={2800} height={1866} />
+          <img src={publicPath("/atlas/narita-apron.jpg")} alt="United aircraft on the Narita apron at night" width={2800} height={1866} loading="lazy" />
         </figure>
         <div className="band-copy">
           <h2>The book</h2>
@@ -81,17 +83,17 @@ export default function Home() {
 
       <section className="band">
         <figure>
-          <img src={publicPath("/atlas/sumburgh-beach.jpg")} alt="Sumburgh Airport from the public beach at dusk" width={2800} height={1524} />
+          <img src={publicPath("/atlas/haneda-lineup.jpg")} alt="An airliner holding on the runway lights at Haneda" width={2800} height={1849} loading="lazy" />
         </figure>
         <div className="band-copy">
           <h2>The fields</h2>
-          <p>Fourteen public places, and nowhere else. A beach, a fence, a stand you can actually stand on. If the note is not here, the desk does not invent one.</p>
+          <p>Fourteen public places, and nowhere else. Haneda is one of them: a deck a visitor can use. If the note does not name a place, there is not one.</p>
           <Link className="btn" href="/fields">See the fields</Link>
         </div>
       </section>
 
       <section className="get-band">
-        <img src={publicPath("/atlas/dulles-dusk.jpg")} alt="Washington Dulles at dusk" width={2800} height={1662} />
+        <img src={publicPath("/atlas/dulles-dusk.jpg")} alt="Washington Dulles at dusk" width={2800} height={1662} loading="lazy" />
         <div>
           <h2>Version 0.2, on the Mac</h2>
           <p>Keys 1 to 7 move among the map, the airports, the airlines, the sky, the history, the library, and settings.</p>

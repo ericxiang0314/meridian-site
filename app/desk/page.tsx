@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
+import { Credit } from "@/components/Credit"
 import { Strip } from "@/components/Fragments"
 import { publicPath } from "@/lib/public-path"
 
@@ -23,6 +24,7 @@ export default function DeskPage() {
         <div>
           <h1>The desk</h1>
           <p>Version 0.2 for the Mac. The site is the atlas. The app is the shift.</p>
+          <Credit name="dulles" />
         </div>
       </section>
       <div className="sheet sheet-follow">

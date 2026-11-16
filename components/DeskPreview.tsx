@@ -103,9 +103,9 @@ export function DeskPreview({ scene }: { scene: Scene }) {
             <rect width={W} height={H} fill="#0c1216" />
             <path d={landPath} fill="#1b2c34" />
             <path d={chain(points.slice(cut))} fill="none" stroke="#8a6730" strokeWidth="3" />
-            <path d={chain(points.slice(0, cut + 1))} fill="none" stroke="#e2a23a" strokeWidth="3.5" />
+            <path d={chain(points.slice(0, cut + 1))} fill="none" stroke="#f2b33d" strokeWidth="3.5" />
             <circle cx={project(from.lat, from.lon, W, H).x} cy={project(from.lat, from.lon, W, H).y} r="5" fill="#f4f1ea" />
-            <circle cx={project(to.lat, to.lon, W, H).x} cy={project(to.lat, to.lon, W, H).y} r="5" fill="#7ec8c3" />
+            <circle cx={project(to.lat, to.lon, W, H).x} cy={project(to.lat, to.lon, W, H).y} r="5" fill="#6bd1b8" />
             <g transform={`translate(${herePoint.x} ${herePoint.y}) rotate(${angle})`}>
               <path d="M 12 0 L -8 6 L -3 0 L -8 -6 Z" fill="#f4f1ea" />
             </g>
@@ -158,6 +158,8 @@ export function DeskPreview({ scene }: { scene: Scene }) {
                 </li>
               ))}
             </ul>
+          ) : query.trim().length >= 2 ? (
+            <p>Nothing in the book matches {query.trim().toUpperCase()}.</p>
           ) : (
             <p>Type two letters. The book behind this box is the same one the desk uses.</p>
           )}

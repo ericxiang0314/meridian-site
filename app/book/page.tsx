@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { Suspense } from "react"
 import { BookSearch } from "@/components/BookSearch"
+import { Credit } from "@/components/Credit"
 import { atlasCounts } from "@/lib/atlas"
 import { searchAirlines, searchAirports, searchTypes } from "@/lib/db"
 import { publicPath } from "@/lib/public-path"
@@ -22,6 +23,7 @@ export default function BookPage() {
       <div>
         <h1>Book</h1>
         <p>Airports, airlines, and the airframes that carry them.</p>
+        <Credit name="narita" />
       </div>
     </section>
     <div className="sheet sheet-follow">

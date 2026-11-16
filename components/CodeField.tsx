@@ -20,10 +20,11 @@ export function CodeField({
   const [hits, setHits] = useState<Hit[]>([])
   const [open, setOpen] = useState(false)
   const skip = useRef("")
+  const focused = useRef(false)
 
   useEffect(() => {
     const query = value.trim()
-    if (query.length < 2 || query === skip.current) {
+    if (!focused.current || query.length < 2 || query === skip.current) {
       setHits([])
       setOpen(false)
       return
@@ -64,9 +65,11 @@ export function CodeField({
           onChange(event.target.value.toUpperCase())
         }}
         onFocus={() => {
+          focused.current = true
           if (hits.length) setOpen(true)
         }}
         onBlur={() => {
+          focused.current = false
           window.setTimeout(() => setOpen(false), 120)
         }}
         onKeyDown={(event) => {

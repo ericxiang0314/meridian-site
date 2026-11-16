@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { Suspense } from "react"
 import { ClockBoard } from "@/components/ClockBoard"
+import { Credit } from "@/components/Credit"
 import { RouteStudio } from "@/components/RouteStudio"
 import { hubs } from "@/lib/db"
 import { publicPath } from "@/lib/public-path"
@@ -24,6 +25,7 @@ export default function ChartPage() {
         <div>
           <h1>Chart</h1>
           <p>An example great circle, not a live flight and not a filed route. Hong Kong to London starts at the same point as the example on the front page.</p>
+          <Credit name="boston" />
         </div>
       </section>
       <Suspense fallback={null}>

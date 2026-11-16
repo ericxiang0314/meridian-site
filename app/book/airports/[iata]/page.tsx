@@ -29,7 +29,7 @@ export default async function AirportPage({ params }: Params) {
         <div>
           <h1>{airport.iata}</h1>
           <p>{airport.name}</p>
-          <p>{airport.city || "City not recorded"} · {airport.tz}</p>
+          <p>{airport.city || airport.tz.split("/").pop()?.replace(/_/g, " ") || "City not recorded"}</p>
           <p>{airport.lat.toFixed(2)}° {airport.hemisphere} / {Math.abs(airport.lon).toFixed(2)}° {airport.side}</p>
           <p>{airport.band} · {airport.fromHkgNm.toLocaleString("en-US")} nm from Hong Kong</p>
           <p>A name in the book, not a live board.</p>
@@ -40,9 +40,9 @@ export default async function AirportPage({ params }: Params) {
           <h2>{field ? "A public place" : "In the book"}</h2>
           <p>{field ? field.note : "The desk can name this airport. It does not have a spotting note."}</p>
           <p>
-            <Link href={`/chart?from=${airport.iata}&to=HKG`}>Track to Hong Kong</Link>
-            {" · "}
-            <Link href={`/chart?from=${airport.iata}&to=LHR`}>Track to London</Link>
+            {airport.iata !== "HKG" ? <Link href={`/chart?from=${airport.iata}&to=HKG`}>Track to Hong Kong</Link> : null}
+            {airport.iata !== "HKG" && airport.iata !== "LHR" ? " · " : null}
+            {airport.iata !== "LHR" ? <Link href={`/chart?from=${airport.iata}&to=LHR`}>Track to London</Link> : null}
           </p>
           <h2>Nearby</h2>
           <ul className="directory">

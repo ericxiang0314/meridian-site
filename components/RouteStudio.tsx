@@ -1,6 +1,6 @@
 "use client"
 
-import { useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { landPath } from "@/lib/land"
 import { initialBearing, project } from "@/lib/geo"
@@ -28,6 +28,7 @@ function chain(points: { lat: number; lon: number }[]): string {
 }
 
 export function RouteStudio({ scenes, active, initialCustom = null }: { scenes: Scene[]; active: number; initialCustom?: Scene | null }) {
+  const router = useRouter()
   const params = useSearchParams()
   const routeName = (params.get("route") ?? "").toUpperCase()
   const found = scenes.findIndex((item) => `${item.from}-${item.to}` === routeName)
@@ -119,6 +120,10 @@ export function RouteStudio({ scenes, active, initialCustom = null }: { scenes: 
     }
   }, [scene, along])
 
+  function share(from: string, to: string) {
+    router.replace(`/chart?from=${from}&to=${to}`, { scroll: false })
+  }
+
   function drawPair(from: string, to: string) {
     const left = from.trim().toUpperCase()
     const right = to.trim().toUpperCase()
@@ -130,6 +135,7 @@ export function RouteStudio({ scenes, active, initialCustom = null }: { scenes: 
       setNote("")
       setAlong(0.28)
       setPlaying(false)
+      share(known.from, known.to)
       return
     }
     const next = pairScene(left, right)
@@ -141,6 +147,7 @@ export function RouteStudio({ scenes, active, initialCustom = null }: { scenes: 
     setPlaying(false)
     setAlong(0.28)
     setCustom(next)
+    share(next.from, next.to)
   }
 
   function placeAt(clientX: number, clientY: number) {
@@ -173,6 +180,7 @@ export function RouteStudio({ scenes, active, initialCustom = null }: { scenes: 
     setFromCode(scenes[next].from)
     setToCode(scenes[next].to)
     setAlong(0.28)
+    share(scenes[next].from, scenes[next].to)
   }
 
   if (!scene || !geometry) return null
@@ -210,11 +218,11 @@ export function RouteStudio({ scenes, active, initialCustom = null }: { scenes: 
           })}
           <path d={landPath} fill="#1b2c34" />
           <path d={geometry.rest} fill="none" stroke="#8a6730" strokeWidth="2.5" />
-          <path d={geometry.flown} fill="none" stroke="#e2a23a" strokeWidth="3" />
+            <path d={geometry.flown} fill="none" stroke="#f2b33d" strokeWidth="3" />
           <circle cx={geometry.from.x} cy={geometry.from.y} r="5" fill="#f4f1ea" />
-          <circle cx={geometry.to.x} cy={geometry.to.y} r="5" fill="#7ec8c3" />
+          <circle cx={geometry.to.x} cy={geometry.to.y} r="5" fill="#6bd1b8" />
           <text x={geometry.from.x + 8} y={geometry.from.y - 8} fill="#f4f1ea" fontSize="14">{scene.from}</text>
-          <text x={geometry.to.x + 8} y={geometry.to.y - 8} fill="#7ec8c3" fontSize="14">{scene.to}</text>
+          <text x={geometry.to.x + 8} y={geometry.to.y - 8} fill="#6bd1b8" fontSize="14">{scene.to}</text>
           <g transform={`translate(${geometry.herePoint.x} ${geometry.herePoint.y}) rotate(${geometry.angle})`}>
             <path d="M 10 0 L -7 5 L -3 0 L -7 -5 Z" fill="#f4f1ea" />
           </g>
@@ -242,6 +250,7 @@ export function RouteStudio({ scenes, active, initialCustom = null }: { scenes: 
                 setToCode(item.to)
                 setAlong(0.28)
                 setNote("")
+                share(item.from, item.to)
               }}
             >
               <b>{item.from}–{item.to}</b>
@@ -250,9 +259,8 @@ export function RouteStudio({ scenes, active, initialCustom = null }: { scenes: 
           ))}
         </div>
         <h2>
-          {scene.fromCity}
-          <br />
-          {scene.toCity}
+          <span>{scene.fromCity}</span>
+          <span>{scene.toCity}</span>
         </h2>
         <p className="scene-by">
           {scene.nm.toLocaleString("en-US")} nm · {scene.bearing}° off {scene.from} · {formatDuration(hours)} at {speed} kt
