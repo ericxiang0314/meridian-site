@@ -96,7 +96,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
             <Link key={link.href} href={link.href}>{link.label}</Link>
           ))}
         </nav>
-        <p>Barcelona by Mike McBey, CC BY 2.0. Haneda by contri, CC BY-SA 2.0. Boston by 4300streetcar, CC BY 4.0. Dulles by Joe Ravi, CC BY-SA 3.0. Narita by Nanashinodensyaku, CC BY-SA 4.0. Sumburgh by Ronnie Robertson, CC BY-SA 2.0. Via Wikimedia Commons.</p>
+        <p>Barcelona by Mike McBey, CC BY 2.0. Haneda by contri, CC BY-SA 2.0. Boston by 4300streetcar, CC BY 4.0. Dulles by Joe Ravi, CC BY-SA 3.0. Narita by Nanashinodensyaku, CC BY-SA 4.0. Via Wikimedia Commons.</p>
       </footer>
     </>
   )

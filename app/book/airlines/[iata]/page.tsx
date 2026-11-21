@@ -20,8 +20,8 @@ export default async function AirlinePage({ params }: Params) {
   const airline = airlineByIata((await params).iata)
   if (!airline) notFound()
   return (
-    <>
-      <article className="record sheet">
+    <div className="sheet">
+      <article className="record">
         <div>
           <h1>{airline.iata}</h1>
           <p>{airline.name}</p>
@@ -33,6 +33,6 @@ export default async function AirlinePage({ params }: Params) {
           <Link href="/book">Back to the book</Link>
         </div>
       </article>
-    </>
+    </div>
   )
 }

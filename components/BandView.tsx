@@ -13,7 +13,7 @@ export function BandView({ band, page }: { band: Band; page: number }) {
   return (
     <div className="sheet">
       <header className="sheet-intro">
-        <h1>{band}</h1>
+        <h1>{band.charAt(0).toUpperCase() + band.slice(1)}</h1>
         <p>{rows.length.toLocaleString("en-US")} airports in this latitude band, by city. Page {current} of {pages}.</p>
       </header>
       <ul className="directory">

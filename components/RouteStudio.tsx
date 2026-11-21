@@ -239,6 +239,16 @@ export function RouteStudio({ scenes, active, initialCustom = null, onPair }: { 
         </div>
       </div>
       <aside className="scene-side">
+        <h2>
+          <span>{scene.fromCity}</span>
+          <span>{scene.toCity}</span>
+        </h2>
+        <p className="scene-by">
+          {scene.nm.toLocaleString("en-US")} nm · {scene.bearing}° off {scene.from} · {formatDuration(hours)} at {speed} kt
+        </p>
+        <p className="scene-kind">
+          {formatDuration(hours * along)} flown · {formatDuration(hours * (1 - along))} still to go. The line is the great circle, not a filed route.
+        </p>
         <div className="film" role="listbox" aria-label="Routes">
           {scenes.map((item, i) => (
             <button
@@ -262,16 +272,6 @@ export function RouteStudio({ scenes, active, initialCustom = null, onPair }: { 
             </button>
           ))}
         </div>
-        <h2>
-          <span>{scene.fromCity}</span>
-          <span>{scene.toCity}</span>
-        </h2>
-        <p className="scene-by">
-          {scene.nm.toLocaleString("en-US")} nm · {scene.bearing}° off {scene.from} · {formatDuration(hours)} at {speed} kt
-        </p>
-        <p className="scene-kind">
-          {formatDuration(hours * along)} flown · {formatDuration(hours * (1 - along))} still to go. The line is the great circle, not a filed route.
-        </p>
         <form
           className="pair-form"
           onSubmit={(event) => {

@@ -1,33 +1,25 @@
 "use client"
 
 import { useEffect, useState, type FormEvent } from "react"
+import { readLive, type LiveAnswer } from "@/lib/live-browser"
+import type { LiveCraft } from "@/lib/live-feed"
 
-type Craft = {
-  callsign: string
-  registration: string
-  type: string
-  lat: number | null
-  lon: number | null
-  altFt: number | null
-  onGround: boolean
-  gsKt: number | null
-  track: number | null
-  rateFpm: number | null
-  phase: string
-  seenSeconds: number | null
-}
+type Craft = LiveCraft
+type Answer = LiveAnswer
 
-type Answer = {
-  found: boolean
-  mode?: "flight" | "near"
-  label?: string
-  mappedFrom?: string | null
-  airport?: string
-  city?: string
-  source?: string
-  aircraft?: Craft | Craft[]
-  note?: string
-  error?: string
+const liveKey = "meridian-live"
+
+function remembered(seed?: { mode: "flight" | "near"; query: string; airport: string }): Answer | null {
+  if (!seed || typeof sessionStorage === "undefined") return null
+  try {
+    const saved = JSON.parse(sessionStorage.getItem(liveKey) || "null") as { mode: string; query: string; airport: string; answer: Answer } | null
+    if (!saved) return null
+    if (saved.mode === "near" && seed.mode === "near" && saved.airport === seed.airport) return saved.answer
+    if (saved.mode === "flight" && seed.mode === "flight" && saved.query === seed.query) return saved.answer
+  } catch {
+    return null
+  }
+  return null
 }
 
 function place(craft: Craft): string {
@@ -57,6 +49,8 @@ export function LiveDesk({
     setMode(seed.mode)
     setQuery(seed.query)
     setAirport(seed.airport)
+    const saved = remembered(seed)
+    if (saved) setAnswer(saved)
   }, [seed?.mode, seed?.query, seed?.airport])
 
   async function read(next: { mode: "flight" | "near"; query: string; airport: string }) {
@@ -65,26 +59,21 @@ export function LiveDesk({
     setAirport(next.airport)
     setPending(true)
     setAnswer(null)
-    const params = next.mode === "near" ? `airport=${encodeURIComponent(next.airport)}` : `q=${encodeURIComponent(next.query)}`
-    const origins = ["", process.env.NEXT_PUBLIC_LIVE_ORIGIN ?? ""].filter((origin, index, all) => origin !== undefined && all.indexOf(origin) === index)
-    let failure = "This copy of the site could not read the feed. The radar does not answer the browser directly, and this host has no server to ask for it."
     try {
-      for (const origin of origins) {
-        const response = await fetch(`${origin}/api/live?${params}`)
-        const type = response.headers.get("content-type") ?? ""
-        if (!type.includes("json")) continue
-        const data = (await response.json()) as Answer
-        setAnswer(data)
-        if (data.found && data.aircraft && !Array.isArray(data.aircraft)) onFlight?.(next.query, data.aircraft)
-        if (data.found && next.mode === "near") onNear?.(next.airport)
-        return
+      const data = await readLive(next)
+      try {
+        sessionStorage.setItem(liveKey, JSON.stringify({ mode: next.mode, query: next.query, airport: next.airport, answer: data }))
+      } catch {
+        /* The list still shows for this view. */
       }
+      setAnswer(data)
+      if (data.found && data.aircraft && !Array.isArray(data.aircraft)) onFlight?.(next.query, data.aircraft)
+      if (data.found && next.mode === "near") onNear?.(next.airport)
     } catch (error) {
-      failure = error instanceof Error ? error.message : failure
+      setAnswer({ found: false, error: error instanceof Error ? error.message : "The radar did not answer." })
     } finally {
       setPending(false)
     }
-    setAnswer({ found: false, error: failure })
   }
 
   const one = answer?.aircraft && !Array.isArray(answer.aircraft) ? answer.aircraft : null
@@ -113,6 +102,7 @@ export function LiveDesk({
           <button key={sample.label} type="button" onClick={() => void read(sample)}>{sample.label}</button>
         ))}
       </div>
+      {!answer && !pending ? <p className="live-note">The feed is adsb.lol. A position is shown only when a receiver sent one.</p> : null}
       {answer?.error ? <p className="live-note">{answer.error}</p> : null}
       {answer?.mappedFrom ? <p className="live-note">{answer.mappedFrom} is asked as the callsign {answer.label}.</p> : null}
       {one ? (

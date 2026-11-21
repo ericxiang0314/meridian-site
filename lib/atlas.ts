@@ -90,12 +90,28 @@ export function distanceNm(a: { lat: number; lon: number }, b: { lat: number; lo
   return Math.round(2 * R * Math.asin(Math.min(1, Math.sqrt(h))))
 }
 
+const pairedMakers = /^(British Aerospace|De Havilland|McDonnell Douglas|Fairchild Dornier|Israel Aircraft|Government Aircraft)\b/i
+
+export function familyOf(maker: string): string {
+  const cleaned = maker.replace(/[,.]+$/g, "").trim()
+  const known = cleaned.match(pairedMakers)
+  if (known) return known[1]
+  const token = cleaned.split(/[\s/]+/)[0] ?? cleaned
+  return token.replace(/-\d.*$/, "").replace(/[,.]+$/g, "") || cleaned
+}
+
 export function makers(): string[] {
-  return [...new Set(atlasTypes.map((row) => row.maker))].sort((a, b) => a.localeCompare(b))
+  const counts = new Map<string, number>()
+  for (const row of atlasTypes) {
+    const family = familyOf(row.maker)
+    counts.set(family, (counts.get(family) ?? 0) + 1)
+  }
+  return [...counts.entries()].filter(([, count]) => count >= 2).map(([family]) => family).sort((a, b) => a.localeCompare(b))
 }
 
 export function typesForMaker(maker: string): AtlasType[] {
-  return atlasTypes.filter((row) => row.maker === maker).sort((a, b) => a.code.localeCompare(b.code))
+  const family = familyOf(maker)
+  return atlasTypes.filter((row) => familyOf(row.maker) === family).sort((a, b) => a.code.localeCompare(b.code))
 }
 
 export function makerCounts(): Array<{ maker: string; count: number }> {
