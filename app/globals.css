@@ -165,6 +165,31 @@ img { display: block; max-width: 100%; }
 .page-intro .credit a, .product-copy .credit a { color: #d7dee2; }
 .pager { width: min(920px, calc(100% - 48px)); margin: 0 auto 48px; display: flex; gap: 18px; }
 .pager span { color: var(--muted); }
+.live {
+  width: min(920px, calc(100% - 48px));
+  margin: 0 auto 36px;
+}
+.live-card h2 { margin-top: 0; }
+.live-note { color: var(--muted); max-width: 62ch; }
+.entrance {
+  width: min(1180px, calc(100% - 64px));
+  margin: 0 auto;
+  padding: 72px 0 8px;
+  display: grid;
+  grid-template-columns: 1.2fr auto;
+  gap: 28px;
+  align-items: end;
+}
+.entrance h2 {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: clamp(48px, 6vw, 84px);
+  line-height: 0.92;
+  margin: 0 0 12px;
+}
+.entrance p { margin: 0; max-width: 46ch; }
+.entrance .btn { border-color: var(--paper); color: var(--paper); }
+.entrance .btn.solid { background: var(--paper); color: var(--ink); border-color: var(--paper); }
 
 .stage {
   width: min(1180px, calc(100% - 48px));
@@ -646,7 +671,7 @@ img { display: block; max-width: 100%; }
 .colophon p { margin: 0; max-width: 78ch; }
 
 @media (max-width: 900px) {
-  .doors, .stage, .record, .pair-form, .product-hero, .band, .band.flip, .get-band, .ledger, .index-row, .results { grid-template-columns: 1fr; }
+  .doors, .stage, .record, .pair-form, .product-hero, .band, .band.flip, .get-band, .ledger, .index-row, .results, .entrance { grid-template-columns: 1fr; }
   .band.flip figure { order: 0; }
   .cover-copy { left: 16px; right: 16px; bottom: 16px; }
   .scene-chart { aspect-ratio: 4 / 3; }

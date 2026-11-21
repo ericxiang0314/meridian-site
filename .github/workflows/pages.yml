@@ -24,6 +24,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Static hosting cannot run the live feed
+        run: rm -rf app/api
       - run: npm run build
         env:
           GITHUB_PAGES: "1"

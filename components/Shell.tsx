@@ -4,13 +4,23 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 
 const links = [
+  { href: "/sky", label: "Track", icon: "track" },
   { href: "/chart", label: "Chart", icon: "chart" },
   { href: "/book", label: "Book", icon: "book" },
   { href: "/fields", label: "Fields", icon: "field" },
 ] as const
 
-function Icon({ name }: { name: "chart" | "book" | "field" | "desk" }) {
+function Icon({ name }: { name: "chart" | "book" | "field" | "desk" | "track" }) {
   const common = { width: 16, height: 16, viewBox: "0 0 16 16", fill: "none", "aria-hidden": true as const }
+  if (name === "track") {
+    return (
+      <svg {...common}>
+        <circle cx="8" cy="8" r="2" fill="currentColor" />
+        <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="1.3" />
+        <path d="M8 1.5v2.2M8 12.3v2.2M1.5 8h2.2M12.3 8h2.2" stroke="currentColor" strokeWidth="1.3" />
+      </svg>
+    )
+  }
   if (name === "chart") {
     return (
       <svg {...common}>
@@ -44,6 +54,7 @@ function Icon({ name }: { name: "chart" | "book" | "field" | "desk" }) {
 }
 
 const footerLinks = [
+  { href: "/sky", label: "Track" },
   { href: "/chart", label: "Chart" },
   { href: "/book", label: "Book" },
   { href: "/book/airports", label: "Airports" },

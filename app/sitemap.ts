@@ -13,6 +13,7 @@ function url(path: string) {
 export default function sitemap(): MetadataRoute.Sitemap {
   const paths = [
     "/",
+    "/sky",
     "/chart",
     "/book",
     "/book/airports",

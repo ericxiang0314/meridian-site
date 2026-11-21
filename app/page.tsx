@@ -31,6 +31,14 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="entrance">
+        <div>
+          <h2>Track a flight</h2>
+          <p>The picture above is an example. It does not know where an aircraft is. Live tracking is a separate desk: a flight number, a callsign, or the aircraft near an airport, read from the public feed.</p>
+        </div>
+        <Link className="btn solid" href="/sky">Open live tracking</Link>
+      </section>
+
       <section className="ledger">
         <div>
           <h2>Seven keys</h2>
