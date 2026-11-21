@@ -2,6 +2,8 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { Credit } from "@/components/Credit"
 import { Strip } from "@/components/Fragments"
+import { airportByIata } from "@/lib/db"
+import { haversineNm } from "@/lib/geo"
 import { publicPath } from "@/lib/public-path"
 
 export const metadata: Metadata = { title: "The desk" }
@@ -17,6 +19,9 @@ const keys = [
 ]
 
 export default function DeskPage() {
+  const from = airportByIata("JFK")
+  const to = airportByIata("LHR")
+  const nm = from && to ? haversineNm(from, to) : 0
   return (
     <>
       <section className="page-intro">
@@ -30,8 +35,8 @@ export default function DeskPage() {
       <div className="sheet sheet-follow">
         <div className="inset paper">
           <h2>A flight card</h2>
-          <Strip flight="CX830" airline="Cathay Pacific" from="Hong Kong" to="London" nm={5994} />
-          <p>An example card for Cathay Pacific 830. It is not a live flight. Height and speed appear on the Mac app only when a feed sent them.</p>
+          <Strip flight="BA117" airline="British Airways" from="New York" to="London" nm={nm} />
+          <p>An example card for a New York to London flight. It is not live. Height and speed appear on the Mac app only when a feed sent them.</p>
         </div>
         <div className="inset">
           <h2>What is live</h2>

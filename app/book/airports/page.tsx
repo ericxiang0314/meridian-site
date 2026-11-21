@@ -1,20 +1,23 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { LetterRail } from "@/components/LetterRail"
-import { atlasCounts, bandCounts, letterCounts, nearestToHongKong } from "@/lib/atlas"
+import { airportRecord, atlasCounts, bandCounts, letterCounts } from "@/lib/atlas"
 
 export const metadata: Metadata = { title: "Airports" }
 
 export default function AirportsIndex() {
   const counts = letterCounts("airports")
   const bands = bandCounts()
-  const near = nearestToHongKong(12)
+  const world = ["JFK", "LHR", "CDG", "DXB", "SIN", "NRT", "LAX", "SYD", "GRU", "AMS", "JNB", "FRA"].flatMap((code) => {
+    const row = airportRecord(code)
+    return row ? [row] : []
+  })
   const total = atlasCounts().airports
   return (
     <div className="sheet">
       <header className="sheet-intro">
         <h1>Airports</h1>
-        <p>{total.toLocaleString("en-US")} places the desk can name. Distance is nautical miles from Hong Kong.</p>
+        <p>{total.toLocaleString("en-US")} places the desk can name, on every continent the book covers.</p>
       </header>
       <LetterRail base="/book/airports/letter" counts={counts} />
       <section className="band-row">
@@ -25,14 +28,14 @@ export default function AirportsIndex() {
           </Link>
         ))}
       </section>
-      <h2>Nearest Hong Kong</h2>
+      <h2>Around the world</h2>
       <ul className="directory">
-        {near.map((row) => (
+        {world.map((row) => (
           <li key={row.iata}>
             <Link href={`/book/airports/${row.iata}`}>
               <b>{row.iata}</b>
               <span>{row.city || row.name}</span>
-              <small>{row.fromHkgNm.toLocaleString("en-US")} nm · {row.band}</small>
+              <small>{row.band} · {row.hemisphere}{row.side}</small>
             </Link>
           </li>
         ))}

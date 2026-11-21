@@ -14,7 +14,7 @@ export default function FieldsPage() {
         <img src={publicPath("/atlas/haneda-lineup.jpg")} alt="An airliner holding on the runway lights at Haneda at night" width={2800} height={1849} />
         <div>
           <h1>Fields</h1>
-          <p>Fourteen public places, and nowhere else. Haneda keeps a deck a visitor can use. If a note does not name a place, there is not one.</p>
+          <p>Public places only. Haneda keeps a deck a visitor can use. If a note does not name a place, there is not one.</p>
           <Credit name="haneda" />
         </div>
       </section>

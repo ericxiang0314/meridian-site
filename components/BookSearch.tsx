@@ -53,7 +53,7 @@ export function BookSearch({ initialQuery, initial }: { initialQuery: string; in
           <input
             name="q"
             value={query}
-            placeholder="HKG, Cathay, A359"
+            placeholder="JFK, Delta, A359"
             aria-label="Search the book"
             onChange={(event) => run(event.target.value)}
           />

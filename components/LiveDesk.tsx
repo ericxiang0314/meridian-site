@@ -39,16 +39,18 @@ function place(craft: Craft): string {
 
 export function LiveDesk() {
   const [mode, setMode] = useState<"flight" | "near">("flight")
-  const [query, setQuery] = useState("CX830")
-  const [airport, setAirport] = useState("HKG")
+  const [query, setQuery] = useState("")
+  const [airport, setAirport] = useState("LHR")
   const [pending, setPending] = useState(false)
   const [answer, setAnswer] = useState<Answer | null>(null)
 
-  async function ask(event: FormEvent) {
-    event.preventDefault()
+  async function read(next: { mode: "flight" | "near"; query: string; airport: string }) {
+    setMode(next.mode)
+    setQuery(next.query)
+    setAirport(next.airport)
     setPending(true)
     setAnswer(null)
-    const params = mode === "near" ? `airport=${encodeURIComponent(airport)}` : `q=${encodeURIComponent(query)}`
+    const params = next.mode === "near" ? `airport=${encodeURIComponent(next.airport)}` : `q=${encodeURIComponent(next.query)}`
     const origins = ["", process.env.NEXT_PUBLIC_LIVE_ORIGIN ?? ""].filter((origin, index, all) => origin !== undefined && all.indexOf(origin) === index)
     let failure = "This copy of the site could not read the feed. The radar does not answer the browser directly, and this host has no server to ask for it."
     try {
@@ -76,14 +78,23 @@ export function LiveDesk() {
         <button type="button" aria-pressed={mode === "flight"} onClick={() => { setMode("flight"); setAnswer(null) }}>One flight</button>
         <button type="button" aria-pressed={mode === "near"} onClick={() => { setMode("near"); setAnswer(null) }}>Near an airport</button>
       </div>
-      <form className="find" onSubmit={ask}>
+      <form className="find" onSubmit={(event: FormEvent) => { event.preventDefault(); void read({ mode, query, airport }) }}>
         {mode === "flight" ? (
-          <input value={query} aria-label="Flight, callsign, or registration" onChange={(event) => setQuery(event.target.value.toUpperCase())} />
+          <input value={query} placeholder="BA117 or BAW117" aria-label="Flight, callsign, or registration" onChange={(event) => setQuery(event.target.value.toUpperCase())} />
         ) : (
-          <input value={airport} maxLength={4} aria-label="Airport code" onChange={(event) => setAirport(event.target.value.toUpperCase())} />
+          <input value={airport} maxLength={4} placeholder="LHR" aria-label="Airport code" onChange={(event) => setAirport(event.target.value.toUpperCase())} />
         )}
         <button type="submit">{pending ? "Reading" : "Read the feed"}</button>
       </form>
+      <div className="filters" role="group" aria-label="Examples">
+        {[
+          { label: "Over London", mode: "near" as const, query: "", airport: "LHR" },
+          { label: "Over New York", mode: "near" as const, query: "", airport: "JFK" },
+          { label: "Over Tokyo", mode: "near" as const, query: "", airport: "NRT" },
+        ].map((sample) => (
+          <button key={sample.label} type="button" onClick={() => void read(sample)}>{sample.label}</button>
+        ))}
+      </div>
       {answer?.error ? <p className="live-note">{answer.error}</p> : null}
       {answer?.mappedFrom ? <p className="live-note">{answer.mappedFrom} is asked as the callsign {answer.label}.</p> : null}
       {one ? (

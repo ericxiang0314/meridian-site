@@ -25,7 +25,7 @@ export default function ChartPage() {
         />
         <div>
           <h1>Chart</h1>
-          <p>An example great circle, not a live flight and not a filed route. Hong Kong to London starts at the same point as the example on the front page. For an aircraft that is actually in the air, use Track.</p>
+          <p>An example great circle, not a live flight and not a filed route. New York to London starts at the same point as the example on the front page. For an aircraft that is actually in the air, use Track.</p>
           <Credit name="boston" />
           <p><Link href="/sky">Open live tracking</Link></p>
         </div>

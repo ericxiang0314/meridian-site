@@ -31,7 +31,7 @@ export default async function AirportPage({ params }: Params) {
           <p>{airport.name}</p>
           <p>{airport.city || airport.tz.split("/").pop()?.replace(/_/g, " ") || "City not recorded"}</p>
           <p>{airport.lat.toFixed(2)}° {airport.hemisphere} / {Math.abs(airport.lon).toFixed(2)}° {airport.side}</p>
-          <p>{airport.band} · {airport.fromHkgNm.toLocaleString("en-US")} nm from Hong Kong</p>
+          <p>{airport.band} · {airport.hemisphere === "N" ? "northern" : "southern"} hemisphere</p>
           <p>A name in the book, not a live board.</p>
           <ClockBoard hubs={[{ iata: airport.iata, city: airport.city || airport.iata, tz: airport.tz }]} />
           {field ? <Link className="action" href={`/fields/${airport.iata}`}>The public place</Link> : null}
@@ -40,9 +40,9 @@ export default async function AirportPage({ params }: Params) {
           <h2>{field ? "A public place" : "In the book"}</h2>
           <p>{field ? field.note : "The desk can name this airport. It does not have a spotting note."}</p>
           <p>
-            {airport.iata !== "HKG" ? <Link href={`/chart?from=${airport.iata}&to=HKG`}>Track to Hong Kong</Link> : null}
-            {airport.iata !== "HKG" && airport.iata !== "LHR" ? " · " : null}
             {airport.iata !== "LHR" ? <Link href={`/chart?from=${airport.iata}&to=LHR`}>Track to London</Link> : null}
+            {airport.iata !== "LHR" && airport.iata !== "JFK" ? " · " : null}
+            {airport.iata !== "JFK" ? <Link href={`/chart?from=${airport.iata}&to=JFK`}>Track to New York</Link> : null}
           </p>
           <h2>Nearby</h2>
           <ul className="directory">

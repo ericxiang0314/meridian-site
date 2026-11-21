@@ -12,7 +12,7 @@ export const metadata: Metadata = { title: "Book" }
 export default function BookPage() {
   const counts = atlasCounts()
   const shelves = [
-    { href: "/book/airports", count: counts.airports, label: "Airports", line: "By letter, by latitude, and by distance from Hong Kong." },
+    { href: "/book/airports", count: counts.airports, label: "Airports", line: "By letter, by latitude, and by hemisphere." },
     { href: "/book/airlines", count: counts.airlines, label: "Airlines", line: "The designator, and the callsign the desk hears." },
     { href: "/book/types", count: counts.types, label: "Airframes", line: "Type codes, grouped by the maker on the nose." },
   ]

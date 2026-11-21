@@ -17,10 +17,10 @@ export function FieldFilter({ fields }: { fields: Field[] }) {
   return (
     <section className="results fields-list">
       <header>
-        <h2>The fourteen</h2>
+        <h2>Public places</h2>
         <p>Public places only. If a note does not name a place, do not invent one at the fence.</p>
         <form className="find inline" onSubmit={(event) => event.preventDefault()}>
-          <input value={query} placeholder="Hong Kong, deck, hill" aria-label="Filter fields" onChange={(event) => setQuery(event.target.value)} />
+          <input value={query} placeholder="London, deck, park" aria-label="Filter fields" onChange={(event) => setQuery(event.target.value)} />
         </form>
       </header>
       {shown.length === 0 ? <p>No field matches that.</p> : shown.map((field) => (

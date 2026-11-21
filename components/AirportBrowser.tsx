@@ -22,8 +22,6 @@ export function AirportBrowser({ letter, airports }: { letter: string; airports:
   const [band, setBand] = useState<(typeof bands)[number]>("all")
   const [hemisphere, setHemisphere] = useState<(typeof hemispheres)[number]>("all")
   const [side, setSide] = useState<(typeof sides)[number]>("all")
-  const [near, setNear] = useState(false)
-  const [sort, setSort] = useState<"city" | "near">("city")
   const [query, setQuery] = useState("")
 
   const shown = useMemo(() => {
@@ -32,10 +30,9 @@ export function AirportBrowser({ letter, airports }: { letter: string; airports:
       .filter((row) => (band === "all" ? true : row.band === band))
       .filter((row) => (hemisphere === "all" ? true : row.hemisphere === hemisphere))
       .filter((row) => (side === "all" ? true : row.side === side))
-      .filter((row) => (near ? row.fromHkgNm <= 1500 : true))
       .filter((row) => (q ? `${row.iata} ${row.city} ${row.name}`.toLowerCase().includes(q) : true))
-      .sort((a, b) => (sort === "near" ? a.fromHkgNm - b.fromHkgNm : a.city.localeCompare(b.city) || a.iata.localeCompare(b.iata)))
-  }, [airports, band, hemisphere, side, near, query, sort])
+      .sort((a, b) => a.city.localeCompare(b.city) || a.iata.localeCompare(b.iata))
+  }, [airports, band, hemisphere, side, query])
 
   return (
     <div className="browser">
@@ -55,11 +52,6 @@ export function AirportBrowser({ letter, airports }: { letter: string; airports:
             {item === "E" ? "East" : "West"}
           </button>
         ))}
-        <button type="button" aria-pressed={near} onClick={() => setNear((value) => !value)}>
-          Within 1,500 nm of Hong Kong
-        </button>
-        <button type="button" aria-pressed={sort === "city"} onClick={() => setSort("city")}>By city</button>
-        <button type="button" aria-pressed={sort === "near"} onClick={() => setSort("near")}>Nearest Hong Kong</button>
       </div>
       <form className="find inline" onSubmit={(event) => event.preventDefault()}>
         <input value={query} placeholder={`Filter ${letter}`} aria-label={`Filter airports under ${letter}`} onChange={(event) => setQuery(event.target.value)} />
@@ -72,7 +64,7 @@ export function AirportBrowser({ letter, airports }: { letter: string; airports:
               <Link href={`/book/airports/${row.iata}`}>
                 <b>{row.iata}</b>
                 <span>{row.city || row.name}</span>
-                <small>{row.band} · {row.hemisphere}{row.side} · {row.fromHkgNm.toLocaleString("en-US")} nm</small>
+                <small>{row.band} · {row.hemisphere}{row.side}</small>
               </Link>
             </li>
           ))}

@@ -3,14 +3,14 @@ import { haversineNm, initialBearing } from "./geo"
 import type { Scene } from "@/components/Stage"
 
 const pairs = [
-  ["HKG", "LHR"],
-  ["PVG", "LAX"],
-  ["NRT", "SFO"],
-  ["SIN", "CDG"],
-  ["PEK", "FRA"],
-  ["ICN", "JFK"],
-  ["CAN", "SYD"],
+  ["JFK", "LHR"],
+  ["LAX", "NRT"],
+  ["CDG", "JFK"],
   ["DXB", "LHR"],
+  ["SYD", "SIN"],
+  ["GRU", "LIS"],
+  ["AMS", "JFK"],
+  ["SFO", "NRT"],
 ] as const
 
 export function routeScenes(): Scene[] {

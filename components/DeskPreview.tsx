@@ -12,11 +12,11 @@ const W = 960
 const H = 480
 
 const sky = [
-  { call: "CPA830", route: "Hong Kong to London", ft: 8000, kt: 240 },
-  { call: "CES511", route: "Shanghai to Los Angeles", ft: 36000, kt: 490 },
-  { call: "UAL875", route: "San Francisco to Tokyo", ft: 34000, kt: 470 },
-  { call: "BAW31", route: "London to Hong Kong", ft: 12000, kt: 310 },
-  { call: "AFR188", route: "Paris to Singapore", ft: 39000, kt: 480 },
+  { call: "BAW117", route: "London to New York", ft: 37000, kt: 480 },
+  { call: "AAL100", route: "New York to London", ft: 8000, kt: 250 },
+  { call: "AFR006", route: "Paris to New York", ft: 36000, kt: 490 },
+  { call: "QFA12", route: "Los Angeles to Sydney", ft: 39000, kt: 480 },
+  { call: "SIA322", route: "Singapore to London", ft: 12000, kt: 310 },
 ]
 
 type Hit = { iata: string; city: string; name: string }
@@ -146,7 +146,7 @@ export function DeskPreview({ scene }: { scene: Scene }) {
       ) : null}
       {tab === "Book" ? (
         <form className="desk-book" role="tabpanel" onSubmit={(event) => event.preventDefault()}>
-          <input value={query} placeholder="HKG, Cathay, or B738" aria-label="Search the book" onChange={(event) => setQuery(event.target.value)} />
+          <input value={query} placeholder="JFK, British Airways, or A359" aria-label="Search the book" onChange={(event) => setQuery(event.target.value)} />
           {hits.length > 0 ? (
             <ul>
               {hits.map((hit) => (

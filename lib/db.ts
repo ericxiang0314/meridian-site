@@ -31,7 +31,7 @@ const fields: Field[] = (fieldsJson as Array<{ iata: string; name: string; stand
   .sort((a, b) => a.name.localeCompare(b.name))
 const fieldMap = new Map(fields.map((row) => [row.iata, row]))
 
-const featuredAirports = ["HKG", "PVG", "PEK", "PKX", "CAN", "HND", "NRT", "ICN", "SIN", "BKK", "LHR", "FRA", "LAX", "DXB", "JFK", "SFO", "CDG", "AMS"]
+const featuredAirports = ["JFK", "LHR", "CDG", "FRA", "AMS", "DXB", "DOH", "SIN", "NRT", "ICN", "SYD", "LAX", "SFO", "GRU", "JNB", "MAD"]
 const featuredAirlines = ["CX", "CA", "MU", "CZ", "NH", "JL", "KE", "SQ", "EK", "QR", "BA", "LH", "AF", "UA", "AA", "DL"]
 
 function includes(value: string, query: string): boolean {
@@ -104,7 +104,7 @@ export function searchTypes(query: string, limit = 8): Airframe[] {
 }
 
 export function hubs(): Airport[] {
-  return ["HKG", "PVG", "NRT", "LHR", "LAX", "DXB"]
+  return ["JFK", "LHR", "CDG", "DXB", "NRT", "SYD"]
     .map((code) => airportMap.get(code))
     .filter((row): row is Airport => row != null)
 }

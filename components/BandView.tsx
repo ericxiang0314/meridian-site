@@ -14,7 +14,7 @@ export function BandView({ band, page }: { band: Band; page: number }) {
     <div className="sheet">
       <header className="sheet-intro">
         <h1>{band}</h1>
-        <p>{rows.length.toLocaleString("en-US")} airports, nearest Hong Kong first. Page {current} of {pages}.</p>
+        <p>{rows.length.toLocaleString("en-US")} airports in this latitude band, by city. Page {current} of {pages}.</p>
       </header>
       <ul className="directory">
         {slice.map((row) => (
@@ -22,7 +22,7 @@ export function BandView({ band, page }: { band: Band; page: number }) {
             <Link href={`/book/airports/${row.iata}`}>
               <b>{row.iata}</b>
               <span>{row.city || row.name}</span>
-              <small>{row.hemisphere}{row.side} · {row.fromHkgNm.toLocaleString("en-US")} nm · {row.tz.split("/").pop()?.replace(/_/g, " ")}</small>
+              <small>{row.hemisphere}{row.side} · {row.tz.split("/").pop()?.replace(/_/g, " ")}</small>
             </Link>
           </li>
         ))}

@@ -25,7 +25,7 @@ export default async function AirportLetterPage({ params }: Params) {
     <div className="sheet">
       <header className="sheet-intro">
         <h1>Airports {letter}</h1>
-        <p>{airports.length.toLocaleString("en-US")} names. Narrow them by latitude band, hemisphere, or distance from Hong Kong.</p>
+        <p>{airports.length.toLocaleString("en-US")} names. Narrow them by latitude band or hemisphere.</p>
       </header>
       <LetterRail base="/book/airports/letter" counts={letterCounts("airports")} current={letter} />
       <AirportBrowser letter={letter} airports={airports} />

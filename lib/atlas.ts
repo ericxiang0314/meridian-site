@@ -58,7 +58,7 @@ export function bandCounts(): Record<Band, number> {
 }
 
 export function airportsInBand(band: Band): AtlasAirport[] {
-  return atlasAirports.filter((row) => row.band === band).sort((a, b) => a.fromHkgNm - b.fromHkgNm)
+  return atlasAirports.filter((row) => row.band === band).sort((a, b) => a.city.localeCompare(b.city) || a.iata.localeCompare(b.iata))
 }
 
 export function nearestToHongKong(limit: number): AtlasAirport[] {

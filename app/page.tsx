@@ -6,7 +6,7 @@ import { publicPath } from "@/lib/public-path"
 import { routeScenes } from "@/lib/routes"
 
 export default function Home() {
-  const scene = routeScenes().find((item) => item.from === "HKG" && item.to === "LHR") ?? routeScenes()[0]
+  const scene = routeScenes()[0]
   const counts = atlasCounts()
   return (
     <>
@@ -95,7 +95,7 @@ export default function Home() {
         </figure>
         <div className="band-copy">
           <h2>The fields</h2>
-          <p>Fourteen public places, and nowhere else. Haneda is one of them: a deck a visitor can use. If the note does not name a place, there is not one.</p>
+          <p>Public places only. Haneda is one of them: a deck a visitor can use. If the note does not name a place, there is not one.</p>
           <Link className="btn" href="/fields">See the fields</Link>
         </div>
       </section>
