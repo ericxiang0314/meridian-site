@@ -1,26 +1,20 @@
 "use client"
 
+import Link from "next/link"
 import { useEffect, useState, type FormEvent } from "react"
+import { airportByIata, nearestAirport } from "@/lib/db"
 import { readLive, type LiveAnswer } from "@/lib/live-browser"
 import type { LiveCraft } from "@/lib/live-feed"
 
 type Craft = LiveCraft
 type Answer = LiveAnswer
+type Ask = { mode: "flight" | "near"; query: string; airport: string }
 
-const liveKey = "meridian-live"
-
-function remembered(seed?: { mode: "flight" | "near"; query: string; airport: string }): Answer | null {
-  if (!seed || typeof sessionStorage === "undefined") return null
-  try {
-    const saved = JSON.parse(sessionStorage.getItem(liveKey) || "null") as { mode: string; query: string; airport: string; answer: Answer } | null
-    if (!saved) return null
-    if (saved.mode === "near" && seed.mode === "near" && saved.airport === seed.airport) return saved.answer
-    if (saved.mode === "flight" && seed.mode === "flight" && saved.query === seed.query) return saved.answer
-  } catch {
-    return null
-  }
-  return null
-}
+const places = [
+  { label: "Over London", airport: "LHR" },
+  { label: "Over New York", airport: "JFK" },
+  { label: "Over Tokyo", airport: "NRT" },
+]
 
 function place(craft: Craft): string {
   if (craft.lat == null || craft.lon == null) return "Position was not sent."
@@ -38,78 +32,90 @@ export function LiveDesk({
   onFlight?: (query: string, craft: Craft) => void
   onNear?: (airport: string) => void
 } = {}) {
-  const [mode, setMode] = useState<"flight" | "near">(seed?.mode ?? "near")
-  const [query, setQuery] = useState(seed?.query ?? "")
+  const [text, setText] = useState(seed?.mode === "flight" ? seed.query : seed?.airport || "LHR")
   const [airport, setAirport] = useState(seed?.airport || "LHR")
-  const [pending, setPending] = useState(false)
+  const [pending, setPending] = useState(true)
   const [answer, setAnswer] = useState<Answer | null>(null)
 
   useEffect(() => {
-    if (!seed) return
-    setMode(seed.mode)
-    setQuery(seed.query)
-    setAirport(seed.airport || "LHR")
-    const saved = remembered(seed)
-    if (saved?.found) {
-      setAnswer(saved)
-      return
-    }
-    if (seed.mode === "flight" && !seed.query.trim()) return
-    void read({ mode: seed.mode, query: seed.query, airport: seed.airport || "LHR" })
-    // Ask once for the subject this page opened with. The buttons call read themselves.
+    const next: Ask = seed?.mode === "flight" && seed.query.trim()
+      ? { mode: "flight", query: seed.query, airport: seed.airport || "LHR" }
+      : { mode: "near", query: "", airport: seed?.airport || "LHR" }
+    setText(next.mode === "flight" ? next.query : next.airport)
+    setAirport(next.airport)
+    void read(next)
+    // Load the subject this page opened with. Later reads come from the form.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [seed?.mode, seed?.query, seed?.airport])
 
-  async function read(next: { mode: "flight" | "near"; query: string; airport: string }) {
-    setMode(next.mode)
-    setQuery(next.query)
-    setAirport(next.airport)
+  async function read(next: Ask) {
+    setAirport(next.airport || "LHR")
     setPending(true)
-    setAnswer(null)
     try {
       const data = await readLive(next)
-      try {
-        sessionStorage.setItem(liveKey, JSON.stringify({ mode: next.mode, query: next.query, airport: next.airport, answer: data }))
-      } catch {
-        /* The list still shows for this view. */
-      }
       setAnswer(data)
+      if (data.airport) setAirport(data.airport)
       if (data.found && data.aircraft && !Array.isArray(data.aircraft)) onFlight?.(next.query, data.aircraft)
-      if (data.found && next.mode === "near") onNear?.(next.airport)
+      if (data.found && next.mode === "near" && data.airport) onNear?.(data.airport)
     } catch (error) {
-      setAnswer({ found: false, error: error instanceof Error ? error.message : "The radar did not answer." })
+      setAnswer({ found: false, error: error instanceof Error ? error.message : "The feed did not answer. Use Show aircraft to try again." })
     } finally {
       setPending(false)
     }
   }
 
+  function ask(raw: string) {
+    const value = raw.trim().toUpperCase()
+    if (!value) {
+      void read({ mode: "near", query: "", airport: airport || "LHR" })
+      return
+    }
+    if (/^[A-Z]{3}$/.test(value) && airportByIata(value)) {
+      setText(value)
+      void read({ mode: "near", query: "", airport: value })
+      return
+    }
+    setText(value)
+    void read({ mode: "flight", query: value, airport: airport || "LHR" })
+  }
+
   const one = answer?.aircraft && !Array.isArray(answer.aircraft) ? answer.aircraft : null
   const many = answer?.aircraft && Array.isArray(answer.aircraft) ? answer.aircraft : []
+  const field = answer?.airport
+    || (one?.lat != null && one.lon != null ? nearestAirport(one.lat, one.lon)?.iata : null)
+    || airport
+  const other = field === "LHR" ? "JFK" : "LHR"
 
   return (
     <div className="live">
-      <div className="filters" role="group" aria-label="What to ask the feed">
-        <button type="button" aria-pressed={mode === "flight"} onClick={() => { setMode("flight"); setAnswer(null) }}>One flight</button>
-        <button type="button" aria-pressed={mode === "near"} onClick={() => { setMode("near"); setAnswer(null) }}>Near an airport</button>
-      </div>
-      <form className="find" onSubmit={(event: FormEvent) => { event.preventDefault(); void read({ mode, query, airport }) }}>
-        {mode === "flight" ? (
-          <input value={query} placeholder="BA117 or BAW117" aria-label="Flight, callsign, or registration" onChange={(event) => setQuery(event.target.value.toUpperCase())} />
-        ) : (
-          <input value={airport} maxLength={4} placeholder="LHR" aria-label="Airport code" onChange={(event) => setAirport(event.target.value.toUpperCase())} />
-        )}
-        <button type="submit">{pending ? "Reading" : "Read the feed"}</button>
+      <form
+        className="find"
+        onSubmit={(event: FormEvent) => {
+          event.preventDefault()
+          ask(text)
+        }}
+      >
+        <input
+          value={text}
+          placeholder="BA117 or LHR"
+          aria-label="Flight, callsign, registration, or airport"
+          onChange={(event) => setText(event.target.value.toUpperCase())}
+        />
+        <button type="submit">{pending ? "Reading" : "Show aircraft"}</button>
       </form>
-      <div className="filters" role="group" aria-label="Examples">
-        {[
-          { label: "Over London", mode: "near" as const, query: "", airport: "LHR" },
-          { label: "Over New York", mode: "near" as const, query: "", airport: "JFK" },
-          { label: "Over Tokyo", mode: "near" as const, query: "", airport: "NRT" },
-        ].map((sample) => (
-          <button key={sample.label} type="button" onClick={() => void read(sample)}>{sample.label}</button>
+      <div className="filters" role="group" aria-label="Places">
+        {places.map((sample) => (
+          <button
+            key={sample.airport}
+            type="button"
+            aria-pressed={answer?.mode === "near" && answer.airport === sample.airport && !answer.missed}
+            onClick={() => ask(sample.airport)}
+          >
+            {sample.label}
+          </button>
         ))}
       </div>
-      {!answer && !pending ? <p className="live-note">The feed is adsb.lol. A position is shown only when a receiver sent one.</p> : null}
+      {pending && !answer ? <p className="live-note">Reading aircraft from the feed.</p> : null}
       {answer?.error ? <p className="live-note">{answer.error}</p> : null}
       {answer?.mappedFrom ? <p className="live-note">{answer.mappedFrom} is asked as the callsign {answer.label}.</p> : null}
       {one ? (
@@ -130,18 +136,36 @@ export function LiveDesk({
       ) : null}
       {many.length > 0 ? (
         <ul className="directory">
-          {many.map((craft) => (
-            <li key={`${craft.callsign}${craft.registration}${craft.lat}`}>
-              <span className="hit">
-                <b>{craft.callsign || craft.registration || "—"}</b>
-                <span>
-                  {place(craft)}
-                  <small>{craft.altFt != null ? `${craft.altFt.toLocaleString("en-US")} ft` : "ground"} · {craft.gsKt ?? "—"} kt · {craft.type}</small>
-                </span>
-              </span>
-            </li>
-          ))}
+          {many.map((craft, index) => {
+            const name = craft.callsign || craft.registration
+            return (
+              <li key={`${name}${craft.lat}${index}`}>
+                <button
+                  type="button"
+                  className="hit"
+                  disabled={!name}
+                  onClick={() => {
+                    if (!name) return
+                    setText(name)
+                    void read({ mode: "flight", query: name, airport })
+                  }}
+                >
+                  <b>{name || "—"}</b>
+                  <span>
+                    {place(craft)}
+                    <small>{craft.altFt != null ? `${craft.altFt.toLocaleString("en-US")} ft` : "ground"} · {craft.gsKt ?? "—"} kt · {craft.type}</small>
+                  </span>
+                </button>
+              </li>
+            )
+          })}
         </ul>
+      ) : null}
+      {field ? (
+        <p className="live-links">
+          <Link href={`/chart?from=${field}&to=${other}`}>Example great circle from {field}</Link>
+          <Link href={`/book/airports/${field}`}>Open {field} in the book</Link>
+        </p>
       ) : null}
       {answer?.note ? <p className="live-note">{answer.note} Source: {answer.source}.</p> : null}
     </div>

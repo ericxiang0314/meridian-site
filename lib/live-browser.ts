@@ -7,6 +7,7 @@ export type LiveAnswer = {
   mode?: "flight" | "near"
   label?: string
   mappedFrom?: string | null
+  missed?: string
   airport?: string
   city?: string
   source?: string
@@ -35,22 +36,45 @@ function extractJson(text: string): { ac?: FeedAircraft[] } | null {
   }
 }
 
-async function pullFeed(path: string): Promise<FeedAircraft[]> {
+function feedUrls(path: string): string[] {
   const target = `https://api.adsb.lol${path}`
-  const urls = [`https://proxy.cors.dev/${target}`, `https://r.jina.ai/${target}`]
-  let last = "The radar did not answer this browser."
-  for (const url of urls) {
-    try {
-      const response = await fetch(url, { cache: "no-store", signal: AbortSignal.timeout(18000) })
-      const parsed = extractJson(await response.text())
-      if (parsed?.ac) return parsed.ac
-      last = "The feed answered without an aircraft list."
-    } catch (error) {
-      const message = error instanceof Error ? error.message : last
-      last = message.includes("fetch") || message.includes("abort") ? "The radar did not answer this browser." : message
+  return [target, `https://proxy.cors.dev/${target}`, `https://r.jina.ai/${target}`]
+}
+
+async function pullFeed(path: string): Promise<FeedAircraft[]> {
+  const urls = feedUrls(path)
+  const waitMs = 14000
+  return new Promise((resolve, reject) => {
+    let pending = urls.length
+    let empty: FeedAircraft[] | null = null
+    let finished = false
+    const done = (result: FeedAircraft[] | null) => {
+      if (finished) return
+      finished = true
+      clearTimeout(timer)
+      if (result) resolve(result)
+      else reject(new Error("The radar did not answer this browser."))
     }
-  }
-  throw new Error(last)
+    const timer = setTimeout(() => done(empty), waitMs)
+    for (const url of urls) {
+      fetch(url, { cache: "no-store", signal: AbortSignal.timeout(waitMs) })
+        .then(async (response) => {
+          if (!response.ok) return null
+          return extractJson(await response.text())?.ac ?? null
+        })
+        .catch(() => null)
+        .then((aircraft) => {
+          if (finished) return
+          if (aircraft && aircraft.length > 0) {
+            done(aircraft)
+            return
+          }
+          if (aircraft && empty == null) empty = aircraft
+          pending -= 1
+          if (pending === 0) done(empty)
+        })
+    }
+  })
 }
 
 async function readOnThisHost(query: string): Promise<LiveAnswer | null> {
@@ -68,45 +92,74 @@ async function readOnThisHost(query: string): Promise<LiveAnswer | null> {
   return null
 }
 
+async function nearAnswer(code: string): Promise<LiveAnswer> {
+  const airport = airportByIata(code)
+  if (!airport) return { found: false, error: "That airport is not in the book." }
+  const list = preferAirborne(await pullFeed(`/v2/lat/${airport.lat}/lon/${airport.lon}/dist/40`)).map(craftFromFeed)
+  return {
+    found: list.length > 0,
+    mode: "near",
+    airport: airport.iata,
+    city: airport.city || airport.name,
+    source: "adsb.lol",
+    aircraft: list,
+    note: nearNote,
+  }
+}
+
+async function withArea(label: string, airport: string, reason: string): Promise<LiveAnswer | null> {
+  try {
+    const area = await nearAnswer(airport || "LHR")
+    if (!Array.isArray(area.aircraft) || area.aircraft.length === 0) return null
+    return {
+      ...area,
+      found: true,
+      missed: label,
+      note: `${reason} These aircraft are over ${area.city}. Gates and delays are not in this feed.`,
+    }
+  } catch {
+    return null
+  }
+}
+
 export async function readLive(next: { mode: "flight" | "near"; query: string; airport: string }): Promise<LiveAnswer> {
   const params = next.mode === "near" ? `airport=${encodeURIComponent(next.airport)}` : `q=${encodeURIComponent(next.query)}`
   const hosted = await readOnThisHost(params)
   if (hosted) return hosted
 
-  if (next.mode === "near") {
-    const airport = airportByIata(next.airport)
-    if (!airport) return { found: false, error: "That airport is not in the book." }
-    const list = preferAirborne(await pullFeed(`/v2/lat/${airport.lat}/lon/${airport.lon}/dist/40`)).map(craftFromFeed)
-    return {
-      found: list.length > 0,
-      mode: "near",
-      airport: airport.iata,
-      city: airport.city || airport.name,
-      source: "adsb.lol",
-      aircraft: list,
-      note: nearNote,
-    }
-  }
+  if (next.mode === "near") return nearAnswer(next.airport)
 
   const resolved = resolveLiveQuery(next.query)
   if (!resolved.ok) return { found: false, error: resolved.error }
-  const first = preferAirborne(await pullFeed(resolved.path))[0]
-  if (!first) {
+  try {
+    const first = preferAirborne(await pullFeed(resolved.path))[0]
+    if (!first) {
+      const area = await withArea(
+        resolved.label,
+        next.airport || "LHR",
+        `No position received for ${resolved.label}. It may be on the ground, or no receiver has it.`,
+      )
+      if (area) return { ...area, label: resolved.label, mappedFrom: resolved.mappedFrom ?? null }
+      return {
+        found: false,
+        label: resolved.label,
+        mappedFrom: resolved.mappedFrom ?? null,
+        source: "adsb.lol",
+        error: `No position received for ${resolved.label}. It may be on the ground, or no receiver has it. This is not a schedule, and it does not mean the flight does not exist.`,
+      }
+    }
     return {
-      found: false,
+      found: true,
+      mode: "flight",
       label: resolved.label,
       mappedFrom: resolved.mappedFrom ?? null,
       source: "adsb.lol",
-      error: `No position received for ${resolved.label}. It may be on the ground, or no receiver has it. This is not a schedule, and it does not mean the flight does not exist.`,
+      aircraft: craftFromFeed(first),
+      note: flightNote,
     }
-  }
-  return {
-    found: true,
-    mode: "flight",
-    label: resolved.label,
-    mappedFrom: resolved.mappedFrom ?? null,
-    source: "adsb.lol",
-    aircraft: craftFromFeed(first),
-    note: flightNote,
+  } catch {
+    const area = await withArea(resolved.label, next.airport || "LHR", `The feed did not answer for ${resolved.label}.`)
+    if (area) return { ...area, label: resolved.label, mappedFrom: resolved.mappedFrom ?? null }
+    throw new Error("The radar did not answer this browser.")
   }
 }

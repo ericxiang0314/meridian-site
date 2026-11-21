@@ -422,6 +422,18 @@ img { display: block; max-width: 100%; }
 .directory b { font-family: var(--display); font-size: 22px; font-weight: 500; grid-row: span 2; }
 .directory small, .hit small { display: block; color: var(--muted); }
 .live .hit { grid-template-columns: minmax(120px, max-content) 1fr; align-items: start; }
+.live button.hit {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.live button.hit:disabled { cursor: default; }
+.live-links { display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 8px 0 0; }
+.live-links a { color: var(--ink); }
 .live .directory { padding-bottom: 12px; }
 .inset.paper { margin-bottom: 48px; }
 .inset.paper .directory { padding-bottom: 0; }
