@@ -19,11 +19,11 @@ export default function Home() {
         />
         <div className="product-copy">
           <h1>The night desk</h1>
-          <p className="lede">Meridian is a flight desk for Mac, and the reference book beside it. Try the chart here. It draws a great circle. It is not live traffic. The Mac app, version 0.2, shows a position only when a feed sends one. That app is not offered as a download.</p>
+          <p className="lede">Track aircraft a public receiver has right now, then open the field or the great-circle chart. The Mac app, version 0.2, is not offered as a download.</p>
           <Credit name="barcelona" />
           <div className="cta-row">
-            <Link className="btn solid" href="/chart">Try the chart</Link>
-            <Link className="btn" href="/desk">About the Mac app</Link>
+            <Link className="btn solid" href="/sky">Track a flight</Link>
+            <Link className="btn" href="/chart">Try the chart</Link>
           </div>
         </div>
         <div className="product-stage">

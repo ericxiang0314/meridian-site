@@ -123,12 +123,12 @@ export function DeskWorkspace({ scenes }: { scenes: Scene[] }) {
         </div>
       </div>
       <div className="desk-panel" key={workspace.mode}>
-        {workspace.mode === "watch" ? (
+        {ready && workspace.mode === "watch" ? (
           <LiveDesk
             seed={{
-              mode: subject.kind === "airport" ? "near" : "flight",
+              mode: subject.kind === "flight" ? "flight" : "near",
               query: subject.kind === "flight" ? subject.query : "",
-              airport: subject.kind === "airport" ? subject.iata : subject.kind === "pair" ? subject.from : "LHR",
+              airport: subject.kind === "airport" ? subject.iata : subject.kind === "pair" ? subject.from : subject.kind === "flight" && subject.near ? subject.near : "LHR",
             }}
             onFlight={(query, craft) => {
               const near = craft.lat != null && craft.lon != null ? nearestAirport(craft.lat, craft.lon)?.iata ?? null : null

@@ -12,8 +12,8 @@ export default function SkyPage() {
   return (
     <div className="sheet">
       <header className="sheet-intro">
-        <h1>The desk</h1>
-        <p>Watch, chart, and the book share one subject. Keys 1, 2, and 3 move between them. A live position is not the example chart, and neither one is a schedule.</p>
+        <h1>Track</h1>
+        <p>Aircraft a receiver has right now. London loads on its own. This is not a schedule, and it does not know gates or delays.</p>
       </header>
       <Suspense fallback={null}>
         <DeskWorkspace scenes={routeScenes()} />

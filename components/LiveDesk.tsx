@@ -38,9 +38,9 @@ export function LiveDesk({
   onFlight?: (query: string, craft: Craft) => void
   onNear?: (airport: string) => void
 } = {}) {
-  const [mode, setMode] = useState<"flight" | "near">("flight")
-  const [query, setQuery] = useState("")
-  const [airport, setAirport] = useState("LHR")
+  const [mode, setMode] = useState<"flight" | "near">(seed?.mode ?? "near")
+  const [query, setQuery] = useState(seed?.query ?? "")
+  const [airport, setAirport] = useState(seed?.airport || "LHR")
   const [pending, setPending] = useState(false)
   const [answer, setAnswer] = useState<Answer | null>(null)
 
@@ -48,9 +48,16 @@ export function LiveDesk({
     if (!seed) return
     setMode(seed.mode)
     setQuery(seed.query)
-    setAirport(seed.airport)
+    setAirport(seed.airport || "LHR")
     const saved = remembered(seed)
-    if (saved) setAnswer(saved)
+    if (saved?.found) {
+      setAnswer(saved)
+      return
+    }
+    if (seed.mode === "flight" && !seed.query.trim()) return
+    void read({ mode: seed.mode, query: seed.query, airport: seed.airport || "LHR" })
+    // Ask once for the subject this page opened with. The buttons call read themselves.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [seed?.mode, seed?.query, seed?.airport])
 
   async function read(next: { mode: "flight" | "near"; query: string; airport: string }) {
