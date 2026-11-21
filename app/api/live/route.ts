@@ -69,7 +69,9 @@ export async function GET(request: Request) {
       const airport = airportByIata(airportCode)
       if (!airport) return Response.json({ found: false, error: "That airport is not in the book." }, { status: 404, headers })
       const aircraft = await readFeed(`/v2/lat/${airport.lat}/lon/${airport.lon}/dist/40`)
-      const list = aircraft.filter((item) => item.lat != null && item.lon != null).slice(0, 12).map(row)
+      const located = aircraft.filter((item) => item.lat != null && item.lon != null)
+      const airborne = located.filter((item) => typeof item.alt_baro === "number" && item.alt_baro > 0)
+      const list = (airborne.length > 0 ? airborne : located).slice(0, 12).map(row)
       return Response.json({
         found: list.length > 0,
         mode: "near",
