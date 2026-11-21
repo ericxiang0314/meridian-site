@@ -171,6 +171,24 @@ img { display: block; max-width: 100%; }
 }
 .live-card { animation: rise 320ms ease; }
 .live-card h2 { margin-top: 0; }
+.desk-modes { width: min(920px, calc(100% - 48px)); margin: 0 auto 16px; display: flex; gap: 8px; }
+.desk-modes button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--ink);
+  cursor: pointer;
+}
+.desk-modes button[aria-selected="true"] { background: var(--ink); color: var(--paper); }
+.desk-modes kbd { font-family: var(--display); }
+.subject { width: min(920px, calc(100% - 48px)); margin: 0 auto 18px; }
+.subject p { margin: 0 0 8px; }
+.desk-panel { animation: rise 320ms ease; }
 @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 .live-note { color: var(--muted); max-width: 62ch; }
 .entrance {
@@ -688,5 +706,5 @@ img { display: block; max-width: 100%; }
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .band img, .band figure:hover img, .letter, .index-row a, .band-row a, .topnav nav a svg, .live-card { transform: none; transition: none; animation: none; }
+  .band img, .band figure:hover img, .letter, .index-row a, .band-row a, .topnav nav a svg, .live-card, .desk-panel { transform: none; transition: none; animation: none; }
 }

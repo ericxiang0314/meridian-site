@@ -1,3 +1,4 @@
+import { haversineNm } from "@/lib/geo"
 import airportsJson from "@/data/source/airports.json"
 import airlinesJson from "@/data/source/airlines.json"
 import typesJson from "@/data/source/aircraft-types.json"
@@ -44,6 +45,19 @@ export function counts(): { airports: number; airlines: number; types: number; f
 
 export function airportByIata(code: string): Airport | null {
   return airportMap.get(code.trim().toUpperCase()) ?? null
+}
+
+export function nearestAirport(lat: number, lon: number): Airport | null {
+  let best: Airport | null = null
+  let bestNm = Infinity
+  for (const row of airports) {
+    const nm = haversineNm({ lat, lon }, row)
+    if (nm < bestNm) {
+      bestNm = nm
+      best = row
+    }
+  }
+  return best
 }
 
 export function airlineByIata(code: string): Airline | null {

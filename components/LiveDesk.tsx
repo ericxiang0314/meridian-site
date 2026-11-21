@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, type FormEvent } from "react"
+import { useEffect, useState, type FormEvent } from "react"
 
 type Craft = {
   callsign: string
@@ -37,12 +37,27 @@ function place(craft: Craft): string {
   return `${Math.abs(craft.lat).toFixed(2)}° ${north}, ${Math.abs(craft.lon).toFixed(2)}° ${east}`
 }
 
-export function LiveDesk() {
+export function LiveDesk({
+  seed,
+  onFlight,
+  onNear,
+}: {
+  seed?: { mode: "flight" | "near"; query: string; airport: string }
+  onFlight?: (query: string, craft: Craft) => void
+  onNear?: (airport: string) => void
+} = {}) {
   const [mode, setMode] = useState<"flight" | "near">("flight")
   const [query, setQuery] = useState("")
   const [airport, setAirport] = useState("LHR")
   const [pending, setPending] = useState(false)
   const [answer, setAnswer] = useState<Answer | null>(null)
+
+  useEffect(() => {
+    if (!seed) return
+    setMode(seed.mode)
+    setQuery(seed.query)
+    setAirport(seed.airport)
+  }, [seed?.mode, seed?.query, seed?.airport])
 
   async function read(next: { mode: "flight" | "near"; query: string; airport: string }) {
     setMode(next.mode)
@@ -58,7 +73,10 @@ export function LiveDesk() {
         const response = await fetch(`${origin}/api/live?${params}`)
         const type = response.headers.get("content-type") ?? ""
         if (!type.includes("json")) continue
-        setAnswer((await response.json()) as Answer)
+        const data = (await response.json()) as Answer
+        setAnswer(data)
+        if (data.found && data.aircraft && !Array.isArray(data.aircraft)) onFlight?.(next.query, data.aircraft)
+        if (data.found && next.mode === "near") onNear?.(next.airport)
         return
       }
     } catch (error) {

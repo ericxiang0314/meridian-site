@@ -27,7 +27,7 @@ function chain(points: { lat: number; lon: number }[]): string {
     .join("")
 }
 
-export function RouteStudio({ scenes, active, initialCustom = null }: { scenes: Scene[]; active: number; initialCustom?: Scene | null }) {
+export function RouteStudio({ scenes, active, initialCustom = null, onPair }: { scenes: Scene[]; active: number; initialCustom?: Scene | null; onPair?: (from: string, to: string) => void }) {
   const router = useRouter()
   const params = useSearchParams()
   const routeName = (params.get("route") ?? "").toUpperCase()
@@ -121,6 +121,10 @@ export function RouteStudio({ scenes, active, initialCustom = null }: { scenes: 
   }, [scene, along])
 
   function share(from: string, to: string) {
+    if (onPair) {
+      onPair(from, to)
+      return
+    }
     router.replace(`/chart?from=${from}&to=${to}`, { scroll: false })
   }
 

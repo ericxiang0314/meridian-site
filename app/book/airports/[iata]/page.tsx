@@ -40,9 +40,11 @@ export default async function AirportPage({ params }: Params) {
           <h2>{field ? "A public place" : "In the book"}</h2>
           <p>{field ? field.note : "The desk can name this airport. It does not have a spotting note."}</p>
           <p>
-            {airport.iata !== "LHR" ? <Link href={`/chart?from=${airport.iata}&to=LHR`}>Track to London</Link> : null}
+            <Link href={`/sky?mode=watch&airport=${airport.iata}`}>Watch overhead</Link>
+            {" · "}
+            {airport.iata !== "LHR" ? <Link href={`/sky?mode=chart&from=${airport.iata}&to=LHR`}>Chart to London</Link> : null}
             {airport.iata !== "LHR" && airport.iata !== "JFK" ? " · " : null}
-            {airport.iata !== "JFK" ? <Link href={`/chart?from=${airport.iata}&to=JFK`}>Track to New York</Link> : null}
+            {airport.iata !== "JFK" ? <Link href={`/sky?mode=chart&from=${airport.iata}&to=JFK`}>Chart to New York</Link> : null}
           </p>
           <h2>Nearby</h2>
           <ul className="directory">
